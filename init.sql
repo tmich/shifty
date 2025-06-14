@@ -25,7 +25,7 @@ CREATE TABLE user_organization (
 CREATE TABLE availabilities (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id),
-    organization_id UUID REFERENCES organizations(id),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     date DATE NOT NULL,
     start_time TIME,
     end_time TIME,
@@ -36,7 +36,7 @@ CREATE TABLE availabilities (
 -- Slot definiti dall'attività (es. Mattina 8-12)
 CREATE TABLE shift_templates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    organization_id UUID REFERENCES organizations(id),
+    organization_id UUID NOT NULL REFERENCES organizations(id),
     name TEXT,
     start_time TIME,
     end_time TIME
@@ -46,7 +46,7 @@ CREATE TABLE shift_templates (
 CREATE TABLE shifts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     template_id UUID REFERENCES shift_templates(id),
-    organization_id UUID REFERENCES organizations(id),
+    organization_id UUID NOT NULL REFERENCES organizations(id),
     date DATE NOT NULL,
     override_reason TEXT,
     created_at TIMESTAMP DEFAULT NOW()
@@ -55,6 +55,7 @@ CREATE TABLE shifts (
 -- Assegnazione turni
 CREATE TABLE shift_assignments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID NOT NULL REFERENCES organizations(id),
     shift_id UUID REFERENCES shifts(id),
     user_id UUID REFERENCES users(id),
     partial_start TIME,
@@ -66,6 +67,7 @@ CREATE TABLE shift_assignments (
 CREATE TABLE timesheets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id),
+    organization_id UUID NOT NULL REFERENCES organizations(id),
     shift_id UUID REFERENCES shifts(id),
     check_in TIMESTAMP,
     check_out TIMESTAMP,
@@ -75,11 +77,11 @@ CREATE TABLE timesheets (
 
 -- DML
 
-INSERT INTO public.users (id,email,"name","role",created_at) VALUES
-	 ('e9f237b6-fbc4-4ff8-933d-26d022c68339'::uuid,'prova@shifty.com','Prova Provona','worker','2025-06-14 17:14:21.090007');
+INSERT INTO public.users (id,email,full_name,role,created_at,is_active) VALUES
+	 ('e9f237b6-fbc4-4ff8-933d-26d022c68339'::uuid,'prova@shifty.com','Prova Provona','worker','2025-06-14 17:14:21.090007', true);
 
-INSERT INTO public.organizations (id,"name",timezone) VALUES
-	 ('a8561caf-c324-4bdd-af4b-15e8a15f2c40'::uuid,'Shifty App','Europe/Rome');
+INSERT INTO public.organizations (id,name,description,created_at) VALUES
+	 ('a8561caf-c324-4bdd-af4b-15e8a15f2c40'::uuid,'Shifty App','A simple organization',localtimestamp);
 
-INSERT INTO public.user_organization (user_id,organization_id) VALUES
-	 ('e9f237b6-fbc4-4ff8-933d-26d022c68339'::uuid,'a8561caf-c324-4bdd-af4b-15e8a15f2c40'::uuid);
+INSERT INTO public.user_organizations (user_id,organization_id) VALUES
+	 ('e9f237b6-fbc4-4ff8-933d-26d022c68339'::uuid,'a8561caf-c324-4bdd-af4b-15e8a15f2c40'::uuid);   

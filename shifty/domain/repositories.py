@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import List
 from uuid import UUID
-from shifty.domain.entities import Availability, AvailabilitySlot
+from shifty.domain.entities import Availability #, AvailabilitySlot
 
 # Repository interface for managing Availability entities
 class AvailabilityRepositoryInterface(ABC):
@@ -31,15 +31,15 @@ class AvailabilityRepositoryInterface(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_availability_on_day(self, user_id: UUID, date: date) -> list[AvailabilitySlot]:
-        """
-        Get all availability slots for a specific user on a given date.
-        :param user_id: UUID of the user whose availability is being queried.
-        :param date: Date for which availability is being queried.
-        :return: List of AvailabilitySlot entities for the specified user and date.
-        """
-        pass
+    # @abstractmethod
+    # def get_availability_on_day(self, user_id: UUID, date: date) -> list[AvailabilitySlot]:
+    #     """
+    #     Get all availability slots for a specific user on a given date.
+    #     :param user_id: UUID of the user whose availability is being queried.
+    #     :param date: Date for which availability is being queried.
+    #     :return: List of AvailabilitySlot entities for the specified user and date.
+    #     """
+    #     pass
 
     @abstractmethod
     def delete(self, availability_id: UUID) -> None:
@@ -64,6 +64,15 @@ class AvailabilityRepositoryInterface(ABC):
         Get all Availability entities for a specific user.
         :param user_id: UUID of the user whose availability is being queried.
         :return: List of Availability entities for the specified user.
+        """
+        pass
+
+    @abstractmethod
+    def get_by_date(self, date: date) -> List[Availability]:
+        """
+        Get all Availability entities for a specific date.
+        :param date: Date for which availability is being queried.
+        :return: List of Availability entities for the specified date.
         """
         pass
 

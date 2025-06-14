@@ -1,0 +1,11 @@
+meta {
+  name: get availabilities by user
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/availabilities/user/e9f237b6-fbc4-4ff8-933d-26d022c68339
+  body: none
+  auth: inherit
+}

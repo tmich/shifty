@@ -1,0 +1,22 @@
+meta {
+  name: Create availability
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/availabilities
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "end_time": "20:00:00",
+    "user_id": "e9f237b6-fbc4-4ff8-933d-26d022c68339",
+    "organization_id": "a8561caf-c324-4bdd-af4b-15e8a15f2c40",
+    "date": "2025-06-18",
+    "start_time": "18:00:00",
+    "note": "prova 18"
+  }
+}
