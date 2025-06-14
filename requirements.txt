@@ -1,0 +1,7 @@
+pydantic
+pydantic[email]
+sqlalchemy
+psycopg2-binary
+fastapi
+uvicorn
+sqlmodel
