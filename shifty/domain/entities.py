@@ -2,7 +2,7 @@ from typing import Literal, Optional
 import uuid
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel, Relationship
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 
 
 class UserOrganization(SQLModel, table=True):
@@ -37,6 +37,11 @@ class User(SQLModel, table=True):
     organizations: list["Organization"] = Relationship(
         back_populates="users",
         link_model=UserOrganization
+    )
+
+    shifts: list["Shift"] = Relationship(
+        back_populates="user", 
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
 
@@ -76,22 +81,35 @@ class Availability(SQLModel, table=True):
     user: Optional["User"] = Relationship(back_populates="availabilities")
 
 
-# class AvailabilitySlot(SQLModel, table=True):
-#     """
-#     Represents a time slot of availability for a user.
-#     This model is used to store the start and end times of an availability slot for a specific user on a given date.
-#     """
+class Shift(SQLModel, table=True):
+    """
+    Represents a work shift assigned to a user in an organization.
+    """
+    __tablename__ = "shifts"  # type: ignore
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="users.id")
+    organization_id: uuid.UUID = Field(foreign_key="organizations.id")
+    date: date
+    start_time: time
+    end_time: time
+    note: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
 
-#     __tablename__ = "availability_slots" # type: ignore
-#     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-#     user_id: uuid.UUID = Field(foreign_key="users.id")
-#     date: date
-#     start_time: time
-#     end_time: time
-#     note: Optional[str] = None
-#     created_at: datetime
-
-#     user: Optional[User] = Relationship(back_populates="availabilities")
+    user: Optional["User"] = Relationship(back_populates="shifts")
+    # Optionally, add organization relationship if needed
 
 
-
+class ShiftType(SQLModel, table=True):
+    """ Represents a shift type in an organization """
+    
+    __tablename__ = "shift_tp"  # type: ignore
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    organization_id: uuid.UUID = Field(foreign_key="organizations.id")
+    name: str   # The name of the shift (e.g., "Morning")
+    start_time: time = datetime.now().time()  # Start time of the shift
+    end_time: time = (datetime.now() + timedelta(hours=8)).time()  # End time of the shift
+    description: Optional[str] = None  # Additional description or notes
+    is_active: bool = Field(default=True) # Whether the slot is currently available
+    created_at: datetime = Field(default_factory=datetime.now)  # When the slot was created
+    updated_at: Optional[datetime] = None  # When the slot was last updated
+    
