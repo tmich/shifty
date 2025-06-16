@@ -2,9 +2,8 @@ import pytest
 from uuid import uuid4
 from datetime import date, time, datetime, timedelta
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, create_engine
 
 from shifty.domain.entities import Availability
 from shifty.infrastructure.db import get_session
