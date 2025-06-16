@@ -16,7 +16,7 @@ class AvailabilityRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def update(self, availability: Availability) -> None:
+    def update(self, availability: Availability) -> Availability:
         """
         Update an existing Availability entity.
         :param availability: Availability entity with updated information.
