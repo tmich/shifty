@@ -83,10 +83,19 @@ class AvailabilityService:
         #return [AvailabilityRead(id=uuid4(), user_id=uuid4(), date=datetime.now().date(), start_time=datetime.now().time(), end_time=datetime.now().time(), created_at=datetime.now()),]  # Placeholder for actual implementation
 
     def delete(self, availability_id: UUID) -> None:
+        """
+        Deletes an availability with the given ID.
+        
+        Args:
+            availability_id: UUID of the availability to delete
+            
+        Raises:
+            NotExistsException: If the availability does not exist
+        """
         try:
             self.repository.delete(availability_id)
-        except ValueError:
-            raise NotExistsException(f"availability with id {availability_id} does not exist")
+        except ValueError as ex:
+            raise NotExistsException(f"Availability with ID {availability_id} does not exist") from ex
 
     def update(self, availability: Availability) -> None:
         self.repository.update(availability)
