@@ -36,5 +36,5 @@ class AvailabilityFull(BaseModel):
     created_at: datetime
     user: Optional[User]
 
-    class Config:
-        orm_mode = True  # This allows the model to work with ORM objects directly
+    class ConfigDict:
+        from_attributes = True # Allows the model to be created from SQLModel attributes

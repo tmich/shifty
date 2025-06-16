@@ -42,6 +42,16 @@ def delete_availability(
     response: Response,
     service: AvailabilityService = Depends(get_availability_service)
 ):
+    """
+    Deletes an availability with the given ID.
+    
+    Args:
+        availability_id: UUID of the availability to delete
+        
+    Returns:
+        204 No Content if successful
+        404 Not Found if the availability does not exist
+    """
     try:
         service.delete(availability_id)
     except NotExistsException:
