@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date, time
-from fastapi import APIRouter, Depends, Response, status
-from shifty.application.dto.availability_dto import AvailabilityCreate, AvailabilityFull, AvailabilityResult
+from fastapi import APIRouter, Depends, Request, Response, status
+from shifty.application.dto.availability_dto import AvailabilityCreate, AvailabilityFull, AvailabilityResult, AvailabilityUpdate
 from shifty.application.use_cases.availability_service import AvailabilityService
 from shifty.dependencies import get_availability_service
 from shifty.domain.entities import Availability  # Updated import
@@ -32,7 +32,7 @@ def create_availability(
 
 @router.get("/", response_model=list[Availability])
 def list_availabilities(
-    service: AvailabilityService = Depends(get_availability_service)
+    service: AvailabilityService = Depends(get_availability_service),
 ):
     return service.list_all()
 
@@ -72,20 +72,10 @@ def get_availability(
 @router.put("/{availability_id}", response_model=Availability)
 def update_availability(
     availability_id: UUID,
-    data: AvailabilityCreate,
+    data: AvailabilityUpdate,
     service: AvailabilityService = Depends(get_availability_service)
 ):
-    availability = Availability(
-        id=availability_id,
-        user_id=data.user_id,
-        organization_id=data.organization_id,  # Assuming this is part of the DTO
-        date=data.date,
-        start_time=data.start_time,
-        end_time=data.end_time,
-        note=data.note,  # Assuming note is optional and can be None
-        created_at=data.created_at,  # Assuming created_at is part of the DTO
-    )
-    service.update(availability)
+    service.update(availability_id, data)
     return service.get_by_id(availability_id)
 
 @router.get("/user/{user_id}", response_model=list[Availability])

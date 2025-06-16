@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import List
 from uuid import UUID
+from shifty.application.dto.availability_dto import AvailabilityUpdate
 from shifty.domain.entities import Availability #, AvailabilitySlot
 
 # Repository interface for managing Availability entities
@@ -16,7 +17,7 @@ class AvailabilityRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def update(self, availability: Availability) -> Availability:
+    def update(self, id: UUID, availability: AvailabilityUpdate) -> Availability:
         """
         Update an existing Availability entity.
         :param availability: Availability entity with updated information.

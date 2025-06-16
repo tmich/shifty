@@ -3,4 +3,5 @@ pydantic[email]
 psycopg2-binary
 fastapi
 uvicorn
+pyjwt
 pytest

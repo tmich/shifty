@@ -97,8 +97,8 @@ def test_get_by_user_id_empty(service, mock_repository):
 
 def test_update_calls_repository_update(service, mock_repository):
     availability = make_availability()
-    service.update(availability)
-    mock_repository.update.assert_called_once_with(availability)
+    service.update(availability.id, availability)
+    mock_repository.update.assert_called_once_with(availability.id, availability)
 
 def test_get_by_user_id_and_date_success(service, mock_repository):
     user_id = uuid4()
@@ -160,8 +160,8 @@ def test_create_past_date_raises(service):
 
 def test_update_calls_repository_update_with_correct_availability(service, mock_repository):
     availability = make_availability()
-    service.update(availability)
-    mock_repository.update.assert_called_with(availability)
+    service.update(availability.id, availability)
+    mock_repository.update.assert_called_with(availability.id, availability)
 
 def test_delete_raises_not_exists_exception(service, mock_repository):
     mock_repository.delete.side_effect = ValueError("not found")

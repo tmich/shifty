@@ -1,3 +1,5 @@
+from uuid import UUID
+from shifty.application.dto.availability_dto import AvailabilityUpdate
 from shifty.domain.repositories import AvailabilityRepositoryInterface
 from shifty.domain.entities import Availability #, AvailabilitySlot
 from sqlmodel import Session, select  # Assuming SQLModel is used for ORM
@@ -42,21 +44,19 @@ class AvailabilityRepository(AvailabilityRepositoryInterface):
             self.session.commit()
         else:
             raise ValueError(f"Availability with id {availability_id} does not exist.")
+    
+    def update(self, id: UUID, availability: AvailabilityUpdate) -> Availability:
+        existing_availability = self.session.get(Availability, id)
+        if not existing_availability:
+            raise ValueError(f"Availability with id {id} does not exist.")
         
-    def update(self, availability) -> Availability:
-        existing_availability = self.session.get(Availability, availability.id)
-        if existing_availability:
-            existing_availability.user_id = existing_availability.user_id
-            existing_availability.date = existing_availability.date
-            existing_availability.start_time = existing_availability.start_time
-            existing_availability.end_time = existing_availability.end_time
-            existing_availability.note = existing_availability.note
-            self.session.add(existing_availability)
-            self.session.commit()
-            self.session.refresh(existing_availability)
-            return existing_availability
-        else:
-            raise ValueError(f"Availability with id {availability.id} does not exist.")
+        availability_data = availability.model_dump(exclude_unset=True)
+        existing_availability.sqlmodel_update(availability_data)
+        self.session.add(existing_availability)
+        self.session.commit()
+        self.session.refresh(existing_availability)
+        return existing_availability
+        
 
     def get_by_id(self, availability_id):
         availability = self.session.get(Availability, availability_id)

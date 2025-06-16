@@ -1,0 +1,11 @@
+meta {
+  name: get all availabilities JWT
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/availabilities/
+  body: none
+  auth: inherit
+}

@@ -3,7 +3,7 @@ from uuid import uuid4, UUID
 from shifty.domain.entities import Availability
 from shifty.domain.repositories import AvailabilityRepositoryInterface
 from shifty.domain.exceptions import InvalidDateRangeException, NotExistsException, InvalidAvailabilityException
-from shifty.application.dto.availability_dto import AvailabilityCreate
+from shifty.application.dto.availability_dto import AvailabilityCreate, AvailabilityUpdate
 
 
 def start_time_must_be_before_end_time(start_time: time, end_time: time) -> bool:
@@ -97,8 +97,8 @@ class AvailabilityService:
         except ValueError as ex:
             raise NotExistsException(f"Availability with ID {availability_id} does not exist") from ex
 
-    def update(self, availability: Availability) -> None:
-        self.repository.update(availability)
+    def update(self, id: UUID, availability: AvailabilityUpdate) -> None:
+        self.repository.update(id, availability)
 
     def get_by_id(self, availability_id: UUID) -> Availability:
         try:

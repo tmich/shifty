@@ -16,6 +16,13 @@ class AvailabilityCreate(BaseModel):
     created_at: datetime = datetime.now()  # Assuming this is set automatically when creating an availability
 
 
+class AvailabilityUpdate(BaseModel):
+    date: date
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    note: Optional[str] = None
+    
+
 class AvailabilityResult(ApiResult):
     """
     Represents the result of an availability operation.
