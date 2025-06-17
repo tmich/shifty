@@ -1,0 +1,11 @@
+meta {
+  name: List open overrides
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/overrides/open
+  body: none
+  auth: inherit
+}

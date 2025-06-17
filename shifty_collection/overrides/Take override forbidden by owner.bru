@@ -1,0 +1,17 @@
+meta {
+  name: Take override forbidden by owner
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/overrides/<OVERRIDE_UUID>/take
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "taken_by_id": "<SHIFT_OWNER_USER_UUID>"
+  }
+}

@@ -1,0 +1,11 @@
+meta {
+  name: List all overrides
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/overrides
+  body: none
+  auth: inherit
+}

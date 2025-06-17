@@ -1,0 +1,21 @@
+meta {
+  name: Create overlapping override forbidden
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/overrides
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "shift_id": "3a547f90-d7ee-48ce-b2bf-ce234a6b9fe0",
+    "requester_id": "0b1ae9cc-754e-4dee-90dc-da89aa7fcb86",
+    "date": "2025-06-18",
+    "start_time": "12:00:00",
+    "end_time": "18:00:00"
+  }
+}

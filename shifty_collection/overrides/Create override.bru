@@ -1,0 +1,21 @@
+meta {
+  name: Create override
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/overrides
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "shift_id": "cdb774dd-8f5d-4818-9ebf-68bff357cf24",
+    "requester_id": "9561cdd0-65ca-4e28-8a5a-7e2a340d1028",
+    "date": "2025-06-18",
+    "start_time": "12:00:00",
+    "end_time": "17:00:00"
+  }
+}

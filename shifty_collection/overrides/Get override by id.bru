@@ -1,0 +1,11 @@
+meta {
+  name: Get override by id
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/overrides/<OVERRIDE_UUID>
+  body: none
+  auth: inherit
+}

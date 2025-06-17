@@ -96,7 +96,10 @@ class Shift(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.now)
 
     user: Optional["User"] = Relationship(back_populates="shifts")
-    # Optionally, add organization relationship if needed
+    overrides: list["Override"] = Relationship(
+        back_populates="shift", 
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
 
 
 class ShiftType(SQLModel, table=True):
@@ -112,4 +115,27 @@ class ShiftType(SQLModel, table=True):
     is_active: bool = Field(default=True) # Whether the slot is currently available
     created_at: datetime = Field(default_factory=datetime.now)  # When the slot was created
     updated_at: Optional[datetime] = None  # When the slot was last updated
-    
+
+
+class Override(SQLModel, table=True):
+    """
+    Represents a request to override (partially or totally) a shift by another user.
+    """
+    __tablename__ = "overrides"  # type: ignore
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    shift_id: uuid.UUID = Field(foreign_key="shifts.id")
+    requester_id: uuid.UUID = Field(foreign_key="users.id")
+    date: date
+    start_time: time
+    end_time: time
+    taken_by_id: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
+    taken_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    is_taken: bool = Field(default=False)
+
+    # Relationships (optional, for ORM navigation)
+    shift: Optional["Shift"] = Relationship(back_populates="overrides")
+    requester: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.requester_id]"})
+    taken_by: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.taken_by_id]"})
+
+

@@ -9,3 +9,7 @@ class NotExistsException(Exception):
 class InvalidAvailabilityException(Exception):
     """Exception raised when an availability is invalid."""
     pass
+
+class InvalidOverrideException(Exception):
+    """Exception raised when an override is invalid."""
+    pass
