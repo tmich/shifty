@@ -1,0 +1,11 @@
+meta {
+  name: Get shifts by date
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/shifts/date/2025-06-18
+  body: none
+  auth: inherit
+}

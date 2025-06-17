@@ -35,3 +35,18 @@ class ShiftService:
             self.repository.delete(shift_id)
         except ValueError:
             raise ValueError("Shift not found")
+
+    def get_by_date(self, date):
+        return self.repository.get_by_date(date)
+
+    def get_by_user(self, user_id):
+        return self.repository.get_by_user(user_id)
+
+    def get_by_user_and_date(self, user_id, date):
+        return self.repository.get_by_user_and_date(user_id, date)
+
+    def update(self, shift_id, data):
+        try:
+            return self.repository.update(shift_id, data)
+        except ValueError:
+            raise ValueError("Shift not found")

@@ -72,3 +72,44 @@ def test_delete_not_found(service, mock_repository):
     mock_repository.delete.side_effect = ValueError
     with pytest.raises(ValueError):
         service.delete(uuid4())
+
+def test_get_by_date(service, mock_repository):
+    test_date = date.today()
+    expected = [make_shift()]
+    mock_repository.get_by_date.return_value = expected
+    result = service.get_by_date(test_date)
+    assert result == expected
+    mock_repository.get_by_date.assert_called_once_with(test_date)
+
+def test_get_by_user(service, mock_repository):
+    user_id = uuid4()
+    expected = [make_shift()]
+    mock_repository.get_by_user.return_value = expected
+    result = service.get_by_user(user_id)
+    assert result == expected
+    mock_repository.get_by_user.assert_called_once_with(user_id)
+
+def test_get_by_user_and_date(service, mock_repository):
+    user_id = uuid4()
+    test_date = date.today()
+    expected = [make_shift()]
+    mock_repository.get_by_user_and_date.return_value = expected
+    result = service.get_by_user_and_date(user_id, test_date)
+    assert result == expected
+    mock_repository.get_by_user_and_date.assert_called_once_with(user_id, test_date)
+
+def test_update_success(service, mock_repository):
+    shift_id = uuid4()
+    data = {"note": "updated"}
+    expected = make_shift()
+    mock_repository.update.return_value = expected
+    result = service.update(shift_id, data)
+    assert result == expected
+    mock_repository.update.assert_called_once_with(shift_id, data)
+
+def test_update_not_found(service, mock_repository):
+    shift_id = uuid4()
+    data = {"note": "updated"}
+    mock_repository.update.side_effect = ValueError
+    with pytest.raises(ValueError):
+        service.update(shift_id, data)

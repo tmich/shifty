@@ -1,0 +1,11 @@
+meta {
+  name: Delete shift
+  type: http
+  seq: 4
+}
+
+delete {
+  url: http://{{HOST}}:{{PORT}}/shifts/<SHIFT_UUID>
+  body: none
+  auth: inherit
+}
