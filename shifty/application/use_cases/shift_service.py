@@ -60,3 +60,6 @@ class ShiftService:
             return self.repository.update(shift_id, data)
         except ValueError:
             raise NotExistsException("Shift not found")
+
+    def get_shift_types(self):
+        return self.repository.get_shift_types()

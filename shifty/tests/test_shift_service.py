@@ -5,7 +5,7 @@ from datetime import date, time, datetime
 
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.application.dto.shift_dto import ShiftCreate
-from shifty.domain.entities import Shift
+from shifty.domain.entities import Shift, ShiftType
 
 @pytest.fixture
 def mock_repository():
@@ -41,6 +41,19 @@ def make_create_dto():
         start_time=time(9, 0),
         end_time=time(17, 0),
         note="test"
+    )
+
+def make_shift_type():
+    return ShiftType(
+        id=uuid4(),
+        organization_id=uuid4(),
+        name="Morning",
+        start_time=time(8, 0),
+        end_time=time(16, 0),
+        description="Morning shift",
+        is_active=True,
+        created_at=datetime.now(),
+        updated_at=None
     )
 
 def test_create_success(service, mock_repository):
@@ -119,3 +132,10 @@ def test_update_not_found(service, mock_repository):
     mock_repository.update.side_effect = ValueError
     with pytest.raises(ValueError):
         service.update(shift_id, data)
+
+def test_get_shift_types(service, mock_repository):
+    expected = [make_shift_type()]
+    mock_repository.get_shift_types.return_value = expected
+    result = service.get_shift_types()
+    assert result == expected
+    mock_repository.get_shift_types.assert_called_once()

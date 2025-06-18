@@ -4,7 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session, select
 
-from shifty.domain.entities import Shift, ShiftRead
+from shifty.domain.entities import Shift, ShiftRead, ShiftType
 from shifty.application.dto.shift_dto import ShiftCreate
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.domain.exceptions import NotExistsException
@@ -88,6 +88,10 @@ def update_shift(
         return updated
     except NotExistsException:
         raise HTTPException(status_code=404, detail="Shift not found")
+
+@router.get("/types", response_model=List[ShiftType])
+def get_shift_types(service: ShiftService = Depends(get_shift_service)):
+    return service.get_shift_types()
 
 @router.options("/")
 def options_shifts():
