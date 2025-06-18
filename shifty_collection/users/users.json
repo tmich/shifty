@@ -1,0 +1,56 @@
+{
+  "name": "Users API Collection",
+  "version": "1.0.0",
+  "description": "Bruno collection for Shifty users endpoints.",
+  "folders": [
+    {
+      "name": "users",
+      "requests": [
+        {
+          "name": "Create user",
+          "method": "POST",
+          "url": "{{baseUrl}}/users/",
+          "body": {
+            "full_name": "Test User",
+            "email": "testuser@example.com",
+            "role": "worker",
+            "is_active": true
+          },
+          "headers": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        {
+          "name": "List users",
+          "method": "GET",
+          "url": "{{baseUrl}}/users/"
+        },
+        {
+          "name": "Get user by ID",
+          "method": "GET",
+          "url": "{{baseUrl}}/users/{{userId}}"
+        },
+        {
+          "name": "Delete user",
+          "method": "DELETE",
+          "url": "{{baseUrl}}/users/{{userId}}"
+        },
+        {
+          "name": "Get users by role",
+          "method": "GET",
+          "url": "{{baseUrl}}/users/role/{{role}}"
+        }
+      ]
+    }
+  ],
+  "environments": [
+    {
+      "name": "local",
+      "variables": [
+        { "name": "baseUrl", "value": "http://localhost:8000" },
+        { "name": "userId", "value": "" },
+        { "name": "role", "value": "worker" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Calculate shifts
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/shifts/calculate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "date": "2025-06-18",
+    "organization_id": "5013a720-38ec-4586-abe2-c66533143bad"
+    
+  }
+}

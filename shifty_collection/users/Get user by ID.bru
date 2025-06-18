@@ -1,0 +1,11 @@
+meta {
+  name: Get user by ID
+  type: http
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/users/{{userId}}
+  body: none
+  auth: inherit
+}
+

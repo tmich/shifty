@@ -1,0 +1,11 @@
+meta {
+  name: Get all shifts types
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/shifts/types/all
+  body: none
+  auth: inherit
+}

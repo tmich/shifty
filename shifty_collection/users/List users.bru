@@ -1,0 +1,11 @@
+meta {
+  name: List users
+  type: http
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}/users
+  body: none
+  auth: inherit
+}
+
