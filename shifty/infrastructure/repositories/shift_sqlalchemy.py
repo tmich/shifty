@@ -1,10 +1,11 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
-
 from shifty.domain.entities import Shift, ShiftType
+from shifty.domain.repositories import ShiftRepositoryInterface
 
-class ShiftRepository:
+
+class ShiftRepository(ShiftRepositoryInterface):
     def __init__(self, session: Session):
         self.session = session
 

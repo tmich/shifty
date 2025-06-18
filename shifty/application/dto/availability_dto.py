@@ -41,7 +41,7 @@ class AvailabilityFull(BaseModel):
     end_time: time
     note: Optional[str] = None
     created_at: datetime
-    user: Optional[User]
+    user: Optional[User] = None
 
     class ConfigDict:
         from_attributes = True # Allows the model to be created from SQLModel attributes

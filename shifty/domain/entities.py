@@ -6,42 +6,53 @@ from datetime import date, time, datetime, timedelta
 import uuid
 
 
-class UserOrganization(SQLModel, table=True):
-    """
-    Represents the association between a user and an organization.
-    This model is used to link users to organizations they belong to.
-    """
-    __tablename__ = "user_organizations"  # type: ignore
-    user_id: uuid.UUID = Field(foreign_key="users.id", primary_key=True)
-    organization_id: uuid.UUID = Field(foreign_key="organizations.id", primary_key=True)
+# class UserOrganization(SQLModel, table=True):
+#     """
+#     Represents the association between a user and an organization.
+#     This model is used to link users to organizations they belong to.
+#     """
+#     __tablename__ = "user_organizations"  # type: ignore
+#     user_id: uuid.UUID = Field(foreign_key="users.id", primary_key=True)
+#     organization_id: uuid.UUID = Field(foreign_key="organizations.id", primary_key=True)
 
 
-class User(SQLModel, table=True):
+class UserBase(SQLModel):
+    """
+    Base model for User, used for creating and reading user data.
+    This model includes fields that are common to both creating and reading user information.
+    """
+    full_name: str
+    email: EmailStr
+    role: str  # Literal["worker", "admin"]
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: Optional[datetime] = None
+
+
+class User(UserBase, table=True):
     """
     Represents a user in the system.
     This model is used to store user information such as full name, email, role, and active status.
     """
     __tablename__ = "users"  # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    full_name: str
-    email: EmailStr
-    role: str #Literal["worker", "admin"]
-    is_active: bool = Field(default=True)
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: Optional[datetime] = None
-    
+    organization_id: uuid.UUID = Field(
+        foreign_key="organizations.id",
+        sa_column_kwargs={"nullable": False}
+    )
+
     availabilities: list["Availability"] = Relationship(
         back_populates="user",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
-    organizations: list["Organization"] = Relationship(
+    organization: Optional["Organization"] = Relationship(
         back_populates="users",
-        link_model=UserOrganization
+        #sa_relationship_kwargs={"foreign_keys": "[User.organization_id]"}
     )
 
     shifts: list["Shift"] = Relationship(
-    back_populates="user",
+        back_populates="user",
         sa_relationship_kwargs={
             "cascade": "all, delete-orphan",
             "foreign_keys": "[Shift.user_id]"
@@ -56,6 +67,7 @@ class User(SQLModel, table=True):
     )
 
 
+
 class Organization(SQLModel, table=True):
     """
     Represents an organization in the system.
@@ -66,12 +78,9 @@ class Organization(SQLModel, table=True):
     name: str
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
-
     users: Optional["User"] = Relationship(
-        back_populates="organizations", 
-        link_model=UserOrganization
+        back_populates="organization"
     )
-    # organization: Optional[Organization] = Relationship(back_populates="users")
 
 
 class Availability(SQLModel, table=True):

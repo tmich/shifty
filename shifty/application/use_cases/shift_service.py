@@ -3,12 +3,18 @@ from datetime import datetime
 from typing import List
 from shifty.domain.entities import Shift, ShiftStatus
 from shifty.domain.exceptions import OverlappingShiftException, NotExistsException
-from shifty.application.dto.shift_dto import ShiftCreate
-from shifty.infrastructure.repositories.shift_sqlalchemy import ShiftRepository
+from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult
+from shifty.domain.repositories import ShiftRepositoryInterface, AvailabilityRepositoryInterface, UserRepositoryInterface
+import random
 
 class ShiftService:
-    def __init__(self, repository: ShiftRepository):
+    def __init__(self, 
+                 repository: ShiftRepositoryInterface, 
+                 availability_repository: AvailabilityRepositoryInterface, 
+                 user_repository: UserRepositoryInterface):
         self.repository = repository
+        self.availability_repository = availability_repository
+        self.user_repository = user_repository
 
     def create(self, data: ShiftCreate) -> Shift:
         # Business rule: cannot create overlapping shifts for the same owner
@@ -37,14 +43,14 @@ class ShiftService:
     def get_by_id(self, shift_id: UUID) -> Shift:
         shift = self.repository.get_by_id(shift_id)
         if not shift:
-            raise ValueError("Shift not found")
+            raise NotExistsException("Shift not found")
         return shift
 
     def delete(self, shift_id: UUID) -> None:
         try:
             self.repository.delete(shift_id)
         except ValueError:
-            raise ValueError("Shift not found")
+            raise NotExistsException("Shift not found")
 
     def get_by_date(self, date):
         return self.repository.get_by_date(date)
@@ -63,3 +69,51 @@ class ShiftService:
 
     def get_shift_types(self):
         return self.repository.get_shift_types()
+
+    def calculate_shifts(self, request: ShiftCalculationRequest) -> list[ShiftCalculationResult]:
+        availabilities = self.availability_repository.get_by_date(request.date)
+        shift_types = self.repository.get_shift_types()
+        assigned_users = set()
+        results = []
+        all_users = [u.id for u in self.user_repository.get_by_role("worker")]
+        for shift_type in shift_types:
+            shift_start = shift_type.start_time
+            shift_end = shift_type.end_time
+            covered = False
+            # Try to cover the shift with available users (no user can do more than one shift)
+            for a in availabilities:
+                if a.user_id in assigned_users:
+                    continue
+                # Check if this availability covers the shift type duration
+                if a.start_time <= shift_start and a.end_time >= shift_end:
+                    assigned_users.add(a.user_id)
+                    results.append(ShiftCalculationResult(
+                        user_id=a.user_id,
+                        organization_id=request.organization_id,
+                        date=request.date,
+                        created_at=datetime.now(),
+                        shift_type=shift_type,
+                        start_time=shift_start,
+                        end_time=shift_end,
+                        user=self.user_repository.get_by_id(a.user_id)
+                    ))
+                    covered = True
+                    break
+            if not covered:
+                # Pick a random user not already assigned
+                available_users = [u for u in all_users if u not in assigned_users]
+                if not available_users:
+                    continue
+                chosen_user_id = random.choice(available_users)
+                results.append(ShiftCalculationResult(
+                    user_id=chosen_user_id,
+                    organization_id=request.organization_id,
+                    date=request.date,
+                    created_at=datetime.now(),
+                    shift_type=shift_type,
+                    start_time=shift_start,
+                    end_time=shift_end,
+                    user=self.user_repository.get_by_id(chosen_user_id)
+                ))
+                assigned_users.add(chosen_user_id)
+        return results

@@ -1,11 +1,8 @@
-from datetime import date, time, datetime
+from datetime import date, time
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
-from sqlmodel import SQLModel
-from shifty.application.dto.user_dto import User
-from shifty.domain.entities import ShiftStatus
-
+from shifty.domain.entities import ShiftType, ShiftBase, User
 
 
 class ShiftCreate(BaseModel):
@@ -16,4 +13,14 @@ class ShiftCreate(BaseModel):
     start_time: time
     end_time: time
     note: Optional[str] = None
+
+
+class ShiftCalculationRequest(BaseModel):
+    date: date
+    organization_id: UUID
+
+
+class ShiftCalculationResult(ShiftBase):
+    shift_type: Optional[ShiftType] = None
+    user: User | None = None
 

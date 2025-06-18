@@ -1,10 +1,11 @@
 # shifty/domain/repositories.py
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import List
+from typing import List, Optional
 from uuid import UUID
+from datetime import date
 from shifty.application.dto.availability_dto import AvailabilityUpdate
-from shifty.domain.entities import Availability #, AvailabilitySlot
+from shifty.domain.entities import Availability, User, Shift, ShiftType
 
 # Repository interface for managing Availability entities
 class AvailabilityRepositoryInterface(ABC):
@@ -86,3 +87,93 @@ class AvailabilityRepositoryInterface(ABC):
         :return: List of Availability entities for the specified user and date.
         """
         pass
+
+# Repository interface for managing User entities
+class UserRepositoryInterface(ABC):
+    @abstractmethod
+    def get_by_id(self, user_id: UUID) -> Optional[User]:
+        """
+        Retrieve a User entity by its ID.
+        :param user_id: UUID of the user to be retrieved.
+        :return: User entity corresponding to the provided ID, or None if not found.
+        """
+        pass
+
+    @abstractmethod
+    def get_all(self) -> List[User]:
+        """
+        Retrieve all User entities from the repository.
+        This method is used to fetch all user records.
+        """
+        pass
+
+    @abstractmethod
+    def add(self, user: User) -> User:
+        """
+        Add a new User entity to the repository.
+        This method is used to create a new user record.
+        """
+        pass
+
+    @abstractmethod
+    def delete(self, user_id: UUID) -> None:
+        """
+        Delete a User entity by its ID.
+        :param user_id: UUID of the user to be deleted.
+        """
+        pass
+
+    @abstractmethod
+    def get_by_role(self, role: str) -> List[User]:
+        """
+        Get all User entities with a specific role.
+        :param role: Role of the users to be queried.
+        :return: List of User entities with the specified role.
+        """
+        pass
+
+
+class ShiftRepositoryInterface(ABC):
+    def get_by_id(self, shift_id: UUID) -> Optional[Shift]:
+        raise NotImplementedError
+
+    def get_all(self) -> List[Shift]:
+        raise NotImplementedError
+
+    def add(self, shift: Shift) -> Shift:
+        raise NotImplementedError
+
+    def delete(self, shift_id: UUID) -> None:
+        raise NotImplementedError
+
+    def get_by_date(self, date: date) -> List[Shift]:
+        raise NotImplementedError
+
+    def get_shift_types(self) -> List[ShiftType]:
+        raise NotImplementedError
+    
+    def get_by_user(self, user_id: UUID) -> List[Shift]:
+        """
+        Get all shifts for a specific user.
+        :param user_id: UUID of the user whose shifts are being queried.
+        :return: List of Shift entities for the specified user.
+        """
+        raise NotImplementedError
+    
+    def get_by_user_and_date(self, user_id: UUID, date: date) -> List[Shift]:
+        """
+        Get all shifts for a specific user on a specific date.
+        :param user_id: UUID of the user whose shifts are being queried.
+        :param date: Date for which shifts are being queried.
+        :return: List of Shift entities for the specified user and date.
+        """
+        raise NotImplementedError
+    
+    def update(self, shift_id: UUID, data: dict) -> Shift:
+        """
+        Update an existing Shift entity.
+        :param shift_id: UUID of the shift to be updated.
+        :param data: Dictionary containing the fields to be updated.
+        :return: Updated Shift entity.
+        """
+        raise NotImplementedError

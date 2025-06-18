@@ -12,14 +12,14 @@ shiftydb = "shiftydb"
 admin_engine = create_engine(
     f"postgresql+psycopg2://postgres:postgres@localhost:5431/{shiftydb}",
     isolation_level="READ UNCOMMITTED",  # Use READ UNCOMMITTED to avoid locking issues during schema changes
-    echo=True, # Enable SQLAlchemy logging
-    future=True, # Use future=True for SQLModel compatibility
+    echo=True,  # Enable SQLAlchemy logging
+    future=True,  # Use future=True for SQLModel compatibility
 )
 engine = create_engine(
     f"postgresql+psycopg2://{default_user}:{default_password}@localhost:5431/{shiftydb}",
     isolation_level="READ UNCOMMITTED",  # Use READ UNCOMMITTED to avoid locking issues during schema changes
     echo=True,  # Enable SQLAlchemy logging
-    future=True, # Use future=True for SQLModel compatibility
+    future=True,  # Use future=True for SQLModel compatibility
 )
 
 # Disable the "sane rowcount" feature for psycopg2
@@ -29,15 +29,15 @@ engine.dialect.supports_sane_rowcount = False
 
 
 # Dipendenza FastAPI
-def get_session() -> Generator[Session, None, None]:
-    db = Session(engine)
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_session() -> Generator[Session, None, None]:
+#     db = Session(engine)
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
 
-def get_db_with_rls(
+def get_session(
     user_id: str = Depends(get_current_user_id),
 ) -> Generator[Session, None, None]:
     with Session(engine) as db:
@@ -52,7 +52,6 @@ def get_db_with_rls(
             db.close()
 
 
-# with admin_engine.connect() as connection:
 def create_default_user(connection):
     query = f"""
     DO $$
@@ -85,7 +84,7 @@ def create_function_current_organization_id(conn):
      SECURITY DEFINER
     AS $function$
     BEGIN
-        RETURN (SELECT organization_id FROM user_organizations WHERE user_id = current_setting('app.current_user_id')::uuid);
+        RETURN (SELECT organization_id FROM users WHERE id = current_setting('app.current_user_id')::uuid);
     END; $function$
     ;
     """
@@ -93,6 +92,59 @@ def create_function_current_organization_id(conn):
 
     conn.execute(create_function)
 
+def create_function_current_role(conn):
+    # Function to get the current user's role
+    create_function = text(
+        """
+    CREATE OR REPLACE FUNCTION public.current_user_role()
+     RETURNS text
+     LANGUAGE plpgsql
+     SECURITY DEFINER
+    AS $function$
+    BEGIN
+        RETURN (SELECT role FROM users WHERE id = current_setting('app.current_user_id')::uuid);
+    END; $function$
+    ;
+    """
+    )
+
+    conn.execute(create_function)
+
+def create_function_is_manager(conn):
+    # Function to check if the current user is a manager
+    create_function = text(
+        """
+    CREATE OR REPLACE FUNCTION public.current_user_is_manager()
+     RETURNS boolean
+     LANGUAGE plpgsql
+     SECURITY DEFINER
+    AS $function$
+    BEGIN
+        RETURN (SELECT role = 'manager' FROM users WHERE id = current_setting('app.current_user_id')::uuid);
+    END; $function$
+    ;
+    """
+    )
+
+    conn.execute(create_function)
+
+def create_function_is_admin(conn):
+    # Function to check if the current user is an admin
+    create_function = text(
+        """
+    CREATE OR REPLACE FUNCTION public.current_user_is_admin()
+     RETURNS boolean
+     LANGUAGE plpgsql
+     SECURITY DEFINER
+    AS $function$
+    BEGIN
+        RETURN (SELECT role = 'admin' FROM users WHERE id = current_setting('app.current_user_id')::uuid);
+    END; $function$
+    ;
+    """
+    )
+
+    conn.execute(create_function)
 
 def create_availability_security_policies(conn):
     # Policy function for filtering rows based on organization membership
@@ -127,14 +179,7 @@ def create_availability_security_policies(conn):
             FOR insert
             with check (
                 user_id = current_setting('app.current_user_id')::uuid 
-                OR 
-                (
-                    EXISTS (
-                        SELECT 1 FROM users u
-                        WHERE u.id = current_setting('app.current_user_id')::uuid
-                        AND u.role IN('admin', 'manager')
-                    )
-                )
+                OR (organization_id = current_organization_id() and current_user_is_manager())
             );
         ELSE
             RAISE NOTICE 'Policy "availabilities_ins_policy" already exists. Skipping.';
@@ -155,14 +200,7 @@ def create_availability_security_policies(conn):
             FOR update
             with check (
                 user_id = current_setting('app.current_user_id')::uuid 
-                OR 
-                (
-                    EXISTS (
-                        SELECT 1 FROM users u
-                        WHERE u.id = current_setting('app.current_user_id')::uuid
-                        AND u.role IN('admin', 'manager')
-                    )
-                )
+                OR (organization_id = current_organization_id() and current_user_is_manager())
             );
         ELSE
             RAISE NOTICE 'Policy "availabilities_mod_policy" already exists. Skipping.';
@@ -183,14 +221,7 @@ DO $$
             FOR delete
             USING (
                 user_id = current_setting('app.current_user_id')::uuid 
-                OR 
-                (
-                    EXISTS (
-                        SELECT 1 FROM users u
-                        WHERE u.id = current_setting('app.current_user_id')::uuid
-                        AND u.role IN('admin', 'manager')
-                    )
-                )
+                OR (organization_id = current_organization_id() and current_user_is_manager())
             );
         ELSE
             RAISE NOTICE 'Policy "availabilities_del_policy" already exists. Skipping.';
@@ -213,10 +244,71 @@ DO $$
     conn.execute(availabilities_del_policy)
 
 
-# Obtain a connection from the engine
-# with admin_engine.connect() as conn:
-#     # Execute DDL statements
-#     create_default_user(conn)
-#     create_function_current_organization_id(conn)
-#     create_availability_security_policies(conn)
-#     conn.commit()
+def create_user_security_policies(conn):
+    # Policy function for filtering rows based on organization membership
+    users_sel_policy = text(
+        """
+        ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT FROM pg_catalog.pg_policies
+                WHERE  policyname = 'users_sel_policy') 
+            THEN
+                CREATE POLICY users_sel_policy ON users
+                FOR SELECT
+                USING (organization_id = current_organization_id());
+            ELSE
+                RAISE NOTICE 'Policy "users_sel_policy" already exists. Skipping.';
+            END IF;
+        END $$;
+    ;
+    """
+    )
+
+    users_ins_policy = text(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT FROM pg_catalog.pg_policies
+                WHERE  policyname = 'users_ins_policy') 
+            THEN
+                CREATE POLICY users_ins_policy ON users
+                FOR insert
+                with check (
+                    organization_id = current_organization_id() 
+                    OR (organization_id = current_organization_id() and current_user_is_manager())
+                );
+            ELSE
+                RAISE NOTICE 'Policy "users_ins_policy" already exists. Skipping.';
+            END IF;
+        END $$;    
+    """
+    )
+
+    users_mod_policy = text(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT FROM pg_catalog.pg_policies
+                WHERE  policyname = 'users_mod_policy') 
+            THEN
+                CREATE POLICY users_mod_policy ON users
+                FOR update
+                with check (
+                    organization_id = current_organization_id() 
+                    OR (organization_id = current_organization_id() and current_user_is_manager())
+                );
+            ELSE
+                RAISE NOTICE 'Policy "users_mod_policy" already exists. Skipping.';
+            END IF;
+        END $$; 
+    """
+    )
+
+    conn.execute(users_sel_policy)
+    conn.execute(users_ins_policy)
+    conn.execute(users_mod_policy)

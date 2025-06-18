@@ -1,31 +1,21 @@
 from uuid import UUID
-from datetime import date, time, datetime
+from datetime import date
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlmodel import Session, select
-
+from shifty.dependencies import get_shift_service
 from shifty.domain.entities import Shift, ShiftRead, ShiftType
-from shifty.application.dto.shift_dto import ShiftCreate
+from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.domain.exceptions import NotExistsException
-from shifty.infrastructure.repositories.shift_sqlalchemy import ShiftRepository
-from shifty.infrastructure.db import get_session
 
 router = APIRouter(prefix="/shifts", tags=["shifts"])
 
-# Dependency
-def get_shift_service(session=Depends(get_session)):
-    return ShiftService(ShiftRepository(session))
 
 @router.post("/", response_model=Shift, status_code=201)
 def create_shift(
     data: ShiftCreate,
-    response: Response,
     service: ShiftService = Depends(get_shift_service)
 ):
-    # session.add(shift)
-    # session.commit()
-    # session.refresh(shift)
 
     try:
         # Create the shift using the service
@@ -37,24 +27,23 @@ def create_shift(
     
 
 @router.get("/", response_model=List[ShiftRead])
-def list_shifts(session: Session = Depends(get_session)):
-    shifts = session.exec(select(Shift)).all()
+def list_shifts(service: ShiftService = Depends(get_shift_service)):
+    shifts = service.list_all()
     return shifts
 
 @router.get("/{shift_id}", response_model=Optional[ShiftRead])
-def get_shift(shift_id: UUID, response: Response, session: Session = Depends(get_session)):
-    shift = session.get(Shift, shift_id)
-    if not shift:
+def get_shift(shift_id: UUID, service: ShiftService = Depends(get_shift_service)):
+    try:
+        return service.get_by_id(shift_id)
+    except NotExistsException:
         raise HTTPException(status_code=404, detail="Shift not found")
-    return shift
 
 @router.delete("/{shift_id}", status_code=204)
-def delete_shift(shift_id: UUID, response: Response, session: Session = Depends(get_session)):
-    shift = session.get(Shift, shift_id)
-    if not shift:
+def delete_shift(shift_id: UUID, response: Response, service: ShiftService = Depends(get_shift_service)):
+    try:
+        service.delete(shift_id)
+    except NotExistsException:
         raise HTTPException(status_code=404, detail="Shift not found")
-    session.delete(shift)
-    session.commit()
 
 @router.get("/date/{date}", response_model=List[ShiftRead])
 def get_shifts_by_date(date: date, service: ShiftService = Depends(get_shift_service)):
@@ -89,7 +78,7 @@ def update_shift(
     except NotExistsException:
         raise HTTPException(status_code=404, detail="Shift not found")
 
-@router.get("/types", response_model=List[ShiftType])
+@router.get("/types/all", response_model=List[ShiftType])
 def get_shift_types(service: ShiftService = Depends(get_shift_service)):
     return service.get_shift_types()
 
@@ -100,3 +89,10 @@ def options_shifts():
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "*"
     })
+
+@router.post("/calculate", response_model=List[ShiftCalculationResult])
+def calculate_shifts(
+    request: ShiftCalculationRequest,
+    service: ShiftService = Depends(get_shift_service)
+):
+    return service.calculate_shifts(request)

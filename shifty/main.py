@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from sqlmodel import SQLModel
-from shifty.api.routers import availabilities, shifts, overrides
-from shifty.infrastructure.db import admin_engine, create_default_user, create_function_current_organization_id, create_availability_security_policies
+from shifty.api.routers import availabilities, shifts, overrides, users
+from shifty.infrastructure.db import (
+    admin_engine, 
+    create_default_user, 
+    create_function_current_organization_id, 
+    create_function_current_role,
+    create_availability_security_policies,
+    create_user_security_policies,
+    create_function_is_manager,
+    create_function_is_admin
+    )
 from fastapi.middleware.cors import CORSMiddleware
 
 # Create all tables in the database
@@ -12,7 +21,11 @@ SQLModel.metadata.create_all(admin_engine)
 with admin_engine.connect() as conn:
     create_default_user(conn)
     create_function_current_organization_id(conn)
+    create_function_current_role(conn)
+    create_function_is_manager(conn)
     create_availability_security_policies(conn)
+    create_user_security_policies(conn)
+    create_function_is_admin(conn)
     conn.commit()
 
 app = FastAPI()
@@ -31,6 +44,7 @@ app.add_middleware(
 app.include_router(availabilities.router)
 app.include_router(shifts.router)
 app.include_router(overrides.router)
+app.include_router(users.router)
 
 @app.get("/")
 async def root():
