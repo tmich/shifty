@@ -41,7 +41,8 @@ class RegistrationService:
         org = self.repository.get_organization_by_code(org_code)
         if not org:
             raise ValueError("Organization not found")
-        existing = self.repository.get_user_by_email_and_org(user_email, org.id)
+        # existing = self.repository.get_user_by_email_and_org(user_email, org.id)
+        existing = self.repository.get_user_by_email(user_email)
         if existing:
             raise ValueError("Email already exists in this organization")
         user = User(

@@ -28,3 +28,6 @@ class RegistrationRepository(RegistrationRepositoryInterface):
 
     def get_user_by_email_and_org(self, email: str, org_id: UUID) -> Optional[User]:
         return self.session.exec(select(User).where(User.email == email, User.organization_id == org_id)).first()
+    
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        return self.session.exec(select(User).where(User.email == email)).first()

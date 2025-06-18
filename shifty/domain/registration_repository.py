@@ -23,3 +23,7 @@ class RegistrationRepositoryInterface(ABC):
     @abstractmethod
     def get_user_by_email_and_org(self, email: str, org_id: UUID) -> Optional[User]:
         pass
+
+    @abstractmethod
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        pass
