@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from shifty.domain.entities import Auth
-from shifty.infrastructure.db import get_auth_session
+from shifty.infrastructure.db import get_admin_session
 from shifty.infrastructure.repositories.auth_sqlalchemy import AuthRepository
 from shifty.application.use_cases.auth_service import AuthService
 from shifty.application.dto.auth_dto import SignupRequest, LoginRequest, TokenResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-def get_auth_service(session: Session = Depends(get_auth_session)):
+def get_auth_service(session: Session = Depends(get_admin_session)):
     return AuthService(AuthRepository(session))
 
 @router.post("/signup", response_model=TokenResponse, status_code=201)

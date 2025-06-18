@@ -76,6 +76,7 @@ class Organization(SQLModel, table=True):
     __tablename__ = "organizations"  # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
+    org_code: str = Field(index=True, unique=True)
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
     users: Optional["User"] = Relationship(

@@ -1,0 +1,20 @@
+meta {
+  name: Register new Organization
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/register/organization
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "organization_name": "Bar degli Stronzi",
+      "user_email": "feltri@example.com",
+      "user_password": "frascati",
+      "full_name": "Vittorio Feltri"
+  }
+}

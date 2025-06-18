@@ -1,0 +1,20 @@
+meta {
+  name: Join Organization
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/register/join
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "org_code": "982034",
+      "user_email": "marianogiusti@example.com",
+      "user_password": "secret",
+      "full_name": "Mariano Giusti"
+  }
+}
