@@ -243,7 +243,6 @@ DO $$
     conn.execute(availabilities_mod_policy)
     conn.execute(availabilities_del_policy)
 
-
 def create_user_security_policies(conn):
     # Policy function for filtering rows based on organization membership
     users_sel_policy = text(
@@ -312,3 +311,28 @@ def create_user_security_policies(conn):
     conn.execute(users_sel_policy)
     conn.execute(users_ins_policy)
     conn.execute(users_mod_policy)
+
+def create_shift_tp_security_policies(conn):
+    # Policy function for filtering rows based on organization membership
+    shift_types_sel_policy = text(
+        """
+        ALTER TABLE public.shift_types ENABLE ROW LEVEL SECURITY;
+
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT FROM pg_catalog.pg_policies
+                WHERE  policyname = 'shift_types_sel_policy') 
+            THEN
+                CREATE POLICY shift_types_sel_policy ON shift_types
+                FOR SELECT
+                USING (is_active = True and organization_id = current_organization_id());
+            ELSE
+                RAISE NOTICE 'Policy "shift_types_sel_policy" already exists. Skipping.';
+            END IF;
+        END $$;
+    ;
+    """
+    )
+
+    conn.execute(shift_types_sel_policy)

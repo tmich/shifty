@@ -9,7 +9,8 @@ from shifty.infrastructure.db import (
     create_availability_security_policies,
     create_user_security_policies,
     create_function_is_manager,
-    create_function_is_admin
+    create_function_is_admin,
+    create_shift_tp_security_policies
     )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,9 +24,10 @@ with admin_engine.connect() as conn:
     create_function_current_organization_id(conn)
     create_function_current_role(conn)
     create_function_is_manager(conn)
+    create_function_is_admin(conn)
     create_availability_security_policies(conn)
     create_user_security_policies(conn)
-    create_function_is_admin(conn)
+    create_shift_tp_security_policies(conn)
     conn.commit()
 
 app = FastAPI()
