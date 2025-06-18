@@ -1,0 +1,18 @@
+meta {
+  name: login
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "lallo@mallo.com",
+    "password": "!sell@ll3ro!"
+  }
+}

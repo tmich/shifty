@@ -207,3 +207,12 @@ class Override(SQLModel, table=True):
     taken_by: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.taken_by_id]"})
 
 
+
+class Auth(SQLModel, table=True):
+    __tablename__ = "auth"  # type: ignore
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    username: str = Field(index=True, unique=True)
+    password_hash: str
+    is_valid: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: Optional[datetime] = None

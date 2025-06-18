@@ -1,0 +1,18 @@
+meta {
+  name: signup
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/auth/signup
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "lallo@mallo.com",
+    "password": "!sell@ll3ro!"
+  }
+}

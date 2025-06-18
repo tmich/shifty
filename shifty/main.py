@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from sqlmodel import SQLModel
-from shifty.api.routers import availabilities, shifts, overrides, users
+from shifty.api.routers import availabilities, shifts, overrides, users, auth
 from shifty.infrastructure.db import (
     admin_engine, 
     create_all_functions,
@@ -37,6 +37,7 @@ app.include_router(availabilities.router)
 app.include_router(shifts.router)
 app.include_router(overrides.router)
 app.include_router(users.router)
+app.include_router(auth.router)
 
 @app.get("/")
 async def root():

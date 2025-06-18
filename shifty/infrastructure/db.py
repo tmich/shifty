@@ -30,12 +30,12 @@ engine.dialect.supports_sane_rowcount = False
 
 
 # Dipendenza FastAPI
-# def get_session() -> Generator[Session, None, None]:
-#     db = Session(engine)
-#     try:
-#         yield db
-#     finally:
-#         db.close()
+def get_auth_session() -> Generator[Session, None, None]:
+    db = Session(engine)
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def get_session(

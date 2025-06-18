@@ -5,3 +5,5 @@ fastapi
 uvicorn
 pyjwt
 pytest
+passlib
+bcrypt
