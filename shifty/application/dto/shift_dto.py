@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, time, datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
@@ -23,4 +23,20 @@ class ShiftCalculationRequest(BaseModel):
 class ShiftCalculationResult(ShiftBase):
     shift_type: Optional[ShiftType] = None
     user: User | None = None
+
+
+class ShiftTypeOut(BaseModel):
+    id: UUID
+    organization_id: UUID
+    name: str
+    start_time: time
+    end_time: time
+    description: Optional[str] = None
+    expected_workers: int
+    is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class ConfigDict:
+        from_attributes = True
 

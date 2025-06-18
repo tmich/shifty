@@ -12,7 +12,7 @@ class UserFull(BaseModel):
     created_at: datetime
     updated_at: datetime | None = None
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
