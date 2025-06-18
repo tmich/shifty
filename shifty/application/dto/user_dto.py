@@ -1,14 +1,24 @@
-import uuid
 from pydantic import BaseModel, EmailStr
+from uuid import UUID
+from datetime import datetime
 
 
-class User(BaseModel):
-    """
-    Represents a user in the system.
-    This model is used to store user information such as full name, email, role, and active status.
-    """
-    id: uuid.UUID
+class UserFull(BaseModel):
+    id: UUID
     full_name: str
     email: EmailStr
-    role: str #Literal["worker", "admin"]
+    role: str
     is_active: bool
+    created_at: datetime
+    updated_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    role: str
+    is_active: bool = True
+    organization_id: UUID
