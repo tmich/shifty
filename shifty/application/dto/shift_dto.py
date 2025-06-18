@@ -40,3 +40,7 @@ class ShiftTypeOut(BaseModel):
     class ConfigDict:
         from_attributes = True
 
+
+class ShiftBulkCreate(BaseModel):
+    shifts: list[ShiftCreate]
+

@@ -6,6 +6,7 @@ from shifty.domain.exceptions import OverlappingShiftException, NotExistsExcepti
 from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult
 from shifty.domain.repositories import ShiftRepositoryInterface, AvailabilityRepositoryInterface, UserRepositoryInterface
 import random
+import copy
 
 class ShiftService:
     def __init__(self, 
@@ -36,6 +37,17 @@ class ShiftService:
             created_at=datetime.now()
         )
         return self.repository.add(shift)
+
+    def create_bulk(self, data: list[ShiftCreate]) -> list[Shift]:
+        created = []
+        for shift_data in data:
+            try:
+                created_shift = self.create(shift_data)
+                created.append(copy.deepcopy(created_shift))
+            except Exception as e:
+                continue
+            # TODO: Handle exceptions for each shift creation
+        return created
 
     def list_all(self) -> List[Shift]:
         return self.repository.get_all()

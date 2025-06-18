@@ -4,7 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from shifty.dependencies import get_shift_service
 from shifty.domain.entities import Shift, ShiftRead, ShiftType
-from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult
+from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult, ShiftBulkCreate
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.domain.exceptions import NotExistsException
 
@@ -96,3 +96,14 @@ def calculate_shifts(
     service: ShiftService = Depends(get_shift_service)
 ):
     return service.calculate_shifts(request)
+
+@router.post("/bulk", response_model=List[Shift], status_code=201)
+def create_shifts_bulk(
+    data: ShiftBulkCreate,
+    service: ShiftService = Depends(get_shift_service)
+):
+    try:
+        shifts = service.create_bulk(data.shifts)
+        return shifts
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

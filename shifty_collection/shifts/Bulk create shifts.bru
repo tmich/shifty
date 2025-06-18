@@ -1,0 +1,81 @@
+meta {
+  name: Bulk create shift
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}/shifts/bulk
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "shifts":[
+    {
+      "user_id": "a6471f19-44a4-480c-8074-e48449a492cf",
+      "origin_user_id": "a6471f19-44a4-480c-8074-e48449a492cf",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "08:00:00",
+      "end_time": "12:00:00",
+      "note": "Confirmed by manager"
+    },
+    {
+      "user_id": "0a956aad-f56a-4b99-84ce-a13bb8bd68b5",
+      "origin_user_id": "0a956aad-f56a-4b99-84ce-a13bb8bd68b5",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "08:00:00",
+      "end_time": "12:00:00",
+      "note": "Confirmed by manager"
+    },
+    {
+      "user_id": "144e6cef-5b47-435d-8e9f-ff4fe81b1876",
+      "origin_user_id": "144e6cef-5b47-435d-8e9f-ff4fe81b1876",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "12:00:00",
+      "end_time": "16:00:00",
+      "note": "Confirmed by manager"
+    },
+    {
+      "user_id": "5cc7b84a-0a36-4936-bd5c-2aec6e28aa94",
+      "origin_user_id": "5cc7b84a-0a36-4936-bd5c-2aec6e28aa94",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "12:00:00",
+      "end_time": "16:00:00",
+      "note": "Confirmed by manager"
+    },
+    {
+      "user_id": "fd4e478a-b7d4-48c8-a7e7-a89a0d3347f3",
+      "origin_user_id": "fd4e478a-b7d4-48c8-a7e7-a89a0d3347f3",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "16:00:00",
+      "end_time": "20:00:00",
+      "note": "Confirmed by manager"
+    },
+    {
+      "user_id": "9561cdd0-65ca-4e28-8a5a-7e2a340d1028",
+      "origin_user_id": "5f62f8c7-8cf0-41bc-95c6-040c9b2522a9",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "16:00:00",
+      "end_time": "20:00:00",
+      "note": "Confirmed by manager"
+    },
+    {
+      "user_id": "5f62f8c7-8cf0-41bc-95c6-040c9b2522a9",
+      "origin_user_id": "5f62f8c7-8cf0-41bc-95c6-040c9b2522a9",
+      "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
+      "date": "2025-06-19",
+      "start_time": "16:00:00",
+      "end_time": "20:00:00",
+      "note": "Confirmed by manager"
+    }
+  ]
+  }
+}

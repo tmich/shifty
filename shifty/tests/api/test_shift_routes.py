@@ -35,3 +35,40 @@ def test_get_shift_types(monkeypatch):
         assert "name" in item
         assert "start_time" in item
         assert "end_time" in item
+
+def test_create_shifts_bulk():
+    # Prepare a list of shifts to create
+    org_id = os.getenv("TEST_ORGANIZATION_ID", str(uuid4()))  # Use a test organization ID or create one
+
+    user_id = str(uuid4())
+    origin_user_id = str(uuid4())
+    shifts = [
+        {
+            "user_id": user_id,
+            "origin_user_id": origin_user_id,
+            "organization_id": org_id,
+            "date": "2025-06-18",
+            "start_time": "08:00:00",
+            "end_time": "12:00:00",
+            "note": "Confirmed by manager"
+        },
+        {
+            "user_id": str(uuid4()),
+            "origin_user_id": origin_user_id,
+            "organization_id": org_id,
+            "date": "2025-06-18",
+            "start_time": "12:00:00",
+            "end_time": "16:00:00",
+            "note": "Confirmed by manager"
+        }
+    ]
+    response = client.post("/shifts/bulk", json={"shifts": shifts})
+    assert response.status_code == 201
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+    for shift, orig in zip(data, shifts):
+        assert shift["user_id"] == orig["user_id"]
+        assert shift["organization_id"] == orig["organization_id"]
+        assert shift["start_time"] == orig["start_time"]
+        assert shift["end_time"] == orig["end_time"]
