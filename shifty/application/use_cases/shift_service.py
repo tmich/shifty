@@ -79,12 +79,12 @@ class ShiftService:
         for shift_type in shift_types:
             shift_start = shift_type.start_time
             shift_end = shift_type.end_time
-            covered = False
+            needed = getattr(shift_type, 'expected_workers', 1)
+            assigned_for_this_shift = 0
             # Try to cover the shift with available users (no user can do more than one shift)
             for a in availabilities:
                 if a.user_id in assigned_users:
                     continue
-                # Check if this availability covers the shift type duration
                 if a.start_time <= shift_start and a.end_time >= shift_end:
                     assigned_users.add(a.user_id)
                     results.append(ShiftCalculationResult(
@@ -97,13 +97,14 @@ class ShiftService:
                         end_time=shift_end,
                         user=self.user_repository.get_by_id(a.user_id)
                     ))
-                    covered = True
-                    break
-            if not covered:
-                # Pick a random user not already assigned
+                    assigned_for_this_shift += 1
+                    if assigned_for_this_shift >= needed:
+                        break
+            # If not enough, pick random users not already assigned
+            while assigned_for_this_shift < needed:
                 available_users = [u for u in all_users if u not in assigned_users]
                 if not available_users:
-                    continue
+                    break
                 chosen_user_id = random.choice(available_users)
                 results.append(ShiftCalculationResult(
                     user_id=chosen_user_id,
@@ -116,4 +117,5 @@ class ShiftService:
                     user=self.user_repository.get_by_id(chosen_user_id)
                 ))
                 assigned_users.add(chosen_user_id)
+                assigned_for_this_shift += 1
         return results

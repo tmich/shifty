@@ -191,6 +191,7 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
             end_time=time(12, 0),
             description="Morning shift",
             is_active=True,
+            expected_workers = 2,
             created_at=datetime.now(),
             updated_at=None
         ),
@@ -202,6 +203,7 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
             end_time=time(16, 0),
             description="Afternoon shift",
             is_active=True,
+            expected_workers = 2,
             created_at=datetime.now(),
             updated_at=None
         ),
@@ -213,6 +215,7 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
             end_time=time(20, 0),
             description="Evening shift",
             is_active=True,
+            expected_workers = 2,
             created_at=datetime.now(),
             updated_at=None
         )
@@ -248,10 +251,10 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
     )
 
     result = service.calculate_shifts(req)
-    # Should return at least a ShiftCalculationResult for each shift type
-    assert len(result) >= len(mock_shift_types)
-    shift_type_names = [r.shift_type.name for r in result]
-    assert set(shift_type_names) == {"Morning", "Evening", "Afternoon"}
+    # Should return expected_workers for each shift type
+    for st in mock_shift_types:
+        count = sum(1 for r in result if r.shift_type.name == st.name)
+        assert count == st.expected_workers, f"Shift type {st.name} should have {st.expected_workers} workers, got {count}"
     # Each user gets at most one shift
     user_ids = [r.user_id for r in result]
     assert len(set(user_ids)) == len(user_ids) or len(set(user_ids)) == 2
