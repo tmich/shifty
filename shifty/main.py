@@ -3,14 +3,9 @@ from sqlmodel import SQLModel
 from shifty.api.routers import availabilities, shifts, overrides, users
 from shifty.infrastructure.db import (
     admin_engine, 
-    create_default_user, 
-    create_function_current_organization_id, 
-    create_function_current_role,
-    create_availability_security_policies,
-    create_user_security_policies,
-    create_function_is_manager,
-    create_function_is_admin,
-    create_shift_tp_security_policies
+    create_all_functions,
+    create_all_security_policies,
+    create_roles
     )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,17 +13,11 @@ from fastapi.middleware.cors import CORSMiddleware
 # This will create the tables defined in the SQLModel models
 SQLModel.metadata.create_all(admin_engine)
 
-# Create default user, function for current organization ID, and security policies for availabilities
+# Create roles, functions and security policies
 with admin_engine.connect() as conn:
-    create_default_user(conn)
-    create_function_current_organization_id(conn)
-    create_function_current_role(conn)
-    create_function_is_manager(conn)
-    create_function_is_admin(conn)
-    create_availability_security_policies(conn)
-    create_user_security_policies(conn)
-    create_shift_tp_security_policies(conn)
-    conn.commit()
+    create_all_functions(conn)
+    create_all_security_policies(conn)
+    create_roles(conn)
 
 app = FastAPI()
 
@@ -43,6 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include the routers for different API endpoints
 app.include_router(availabilities.router)
 app.include_router(shifts.router)
 app.include_router(overrides.router)

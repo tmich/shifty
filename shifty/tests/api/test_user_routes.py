@@ -10,7 +10,7 @@ from shifty.security.dependencies import get_current_user_id
 
 client = TestClient(app)
 
-app.dependency_overrides[get_current_user_id] = lambda: os.getenv("TEST_USER_ID", str(uuid.uuid4())) 
+app.dependency_overrides[get_current_user_id] = lambda: os.getenv("CURRENT_USER_ID", str(uuid.uuid4())) 
 
 # Fixtures for test DB setup/teardown could be added here if needed
 

@@ -189,7 +189,8 @@ class Override(SQLModel, table=True):
     __tablename__ = "overrides"  # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     shift_id: uuid.UUID = Field(foreign_key="shifts.id")
-    requester_id: uuid.UUID = Field(foreign_key="users.id")
+    user_id: uuid.UUID = Field(foreign_key="users.id")
+    organization_id: uuid.UUID = Field(foreign_key="organizations.id")
     date: date
     start_time: time
     end_time: time
@@ -200,7 +201,9 @@ class Override(SQLModel, table=True):
 
     # Relationships (optional, for ORM navigation)
     shift: Optional[Shift] = Relationship(back_populates="overrides")
-    requester: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.requester_id]"})
+    user: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Override.user_id]"}, 
+    )
     taken_by: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.taken_by_id]"})
 
 

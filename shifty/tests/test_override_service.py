@@ -28,7 +28,8 @@ def make_override():
     return Override(
         id=uuid4(),
         shift_id=uuid4(),
-        requester_id=uuid4(),
+        user_id=uuid4(),
+        organization_id=uuid4(),
         date=date(2025, 6, 17),
         start_time=time(9, 0),
         end_time=time(17, 0),

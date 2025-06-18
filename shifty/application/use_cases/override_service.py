@@ -37,7 +37,8 @@ class OverrideService:
 
         override = Override(
             shift_id=data.shift_id,
-            requester_id=data.requester_id,
+            user_id=data.requester_id,
+            organization_id=shift.organization_id,
             date=data.date,
             start_time=data.start_time,
             end_time=data.end_time,
@@ -97,7 +98,7 @@ class OverrideService:
         # Mark override as taken
         override_update = OverrideUpdate(
             shift_id=override.shift_id,
-            requester_id=override.requester_id,
+            requester_id=override.user_id,
             date=override.date,
             start_time=data.start_time,
             end_time=data.end_time,

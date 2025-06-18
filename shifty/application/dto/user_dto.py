@@ -5,6 +5,7 @@ from datetime import datetime
 
 class UserFull(BaseModel):
     id: UUID
+    organization_id: UUID
     full_name: str
     email: EmailStr
     role: str
