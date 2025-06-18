@@ -97,8 +97,11 @@ class AvailabilityService:
         except ValueError as ex:
             raise NotExistsException(f"Availability with ID {availability_id} does not exist") from ex
 
-    def update(self, id: UUID, availability: AvailabilityUpdate) -> None:
-        self.repository.update(id, availability)
+    def update(self, id: UUID, availability: AvailabilityUpdate) -> Availability:
+        try:
+            return self.repository.update(id, availability)
+        except ValueError as ex:
+            raise NotExistsException(f"Availability with ID {id} does not exist") from ex
 
     def get_by_id(self, availability_id: UUID) -> Availability:
         try:

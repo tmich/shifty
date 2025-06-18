@@ -46,12 +46,17 @@ class AvailabilityRepository(AvailabilityRepositoryInterface):
             raise ValueError(f"Availability with id {availability_id} does not exist.")
     
     def update(self, id: UUID, availability: AvailabilityUpdate) -> Availability:
-        existing_availability = self.session.get(Availability, id)
+        #existing_availability = self.session.get(Availability, id)
+        select1 = select(Availability).where(Availability.id == id)
+        existing_availability = self.session.exec(select1).first()
+
         if not existing_availability:
             raise ValueError(f"Availability with id {id} does not exist.")
         
-        availability_data = availability.model_dump(exclude_unset=True)
-        existing_availability.sqlmodel_update(availability_data)
+        #availability_data = availability.model_dump(exclude_unset=True)
+        #existing_availability.sqlmodel_update(availability_data)
+        existing_availability.note = availability.note
+        
         self.session.add(existing_availability)
         self.session.commit()
         self.session.refresh(existing_availability)

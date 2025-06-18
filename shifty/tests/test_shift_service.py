@@ -16,9 +16,12 @@ def service(mock_repository):
     return ShiftService(mock_repository)
 
 def make_shift():
+    user_id=uuid4()
+
     return Shift(
         id=uuid4(),
-        user_id=uuid4(),
+        user_id=user_id,
+        origin_user_id=user_id,
         organization_id=uuid4(),
         date=date.today(),
         start_time=time(9, 0),
@@ -28,8 +31,11 @@ def make_shift():
     )
 
 def make_create_dto():
+    user_id = uuid4()
+
     return ShiftCreate(
-        user_id=uuid4(),
+        user_id=user_id,
+        origin_user_id=user_id,
         organization_id=uuid4(),
         date=date.today(),
         start_time=time(9, 0),

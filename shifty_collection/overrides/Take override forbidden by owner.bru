@@ -5,13 +5,15 @@ meta {
 }
 
 post {
-  url: http://{{HOST}}:{{PORT}}/overrides/<OVERRIDE_UUID>/take
+  url: http://{{HOST}}:{{PORT}}/overrides/022246c9-79a9-4a4b-a3ba-9c0cef9161e5/take
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "taken_by_id": "<SHIFT_OWNER_USER_UUID>"
+    "taken_by_id": "9561cdd0-65ca-4e28-8a5a-7e2a340d1028",
+    "start_time": "09:00",
+    "end_time": "13:00"
   }
 }

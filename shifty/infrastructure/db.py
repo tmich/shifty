@@ -9,8 +9,18 @@ default_password = "shifty_password"
 shiftydb = "shiftydb"
 
 # create a new postgresql database
-admin_engine = create_engine(f"postgresql+psycopg2://postgres:postgres@localhost:5431/{shiftydb}", echo=True, future=True)
-engine = create_engine(f"postgresql+psycopg2://{default_user}:{default_password}@localhost:5431/{shiftydb}", echo=True, future=True)
+admin_engine = create_engine(
+    f"postgresql+psycopg2://postgres:postgres@localhost:5431/{shiftydb}",
+    isolation_level="READ UNCOMMITTED",  # Use READ UNCOMMITTED to avoid locking issues during schema changes
+    echo=True, # Enable SQLAlchemy logging
+    future=True, # Use future=True for SQLModel compatibility
+)
+engine = create_engine(
+    f"postgresql+psycopg2://{default_user}:{default_password}@localhost:5431/{shiftydb}",
+    isolation_level="READ UNCOMMITTED",  # Use READ UNCOMMITTED to avoid locking issues during schema changes
+    echo=True,  # Enable SQLAlchemy logging
+    future=True, # Use future=True for SQLModel compatibility
+)
 
 # Disable the "sane rowcount" feature for psycopg2
 # This is necessary because psycopg2 does not support the `RETURNING` clause in all cases
@@ -26,7 +36,10 @@ def get_session() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-def get_db_with_rls(user_id: str = Depends(get_current_user_id)) -> Generator[Session, None, None]:
+
+def get_db_with_rls(
+    user_id: str = Depends(get_current_user_id),
+) -> Generator[Session, None, None]:
     with Session(engine) as db:
         try:
             # Set the current user ID for RLS
@@ -61,10 +74,11 @@ def create_default_user(connection):
     connection.execute(text(query))
     connection.commit()
 
+
 def create_function_current_organization_id(conn):
     # Function to get the current organization ID based on the user's organization membership
     create_function = text(
-    """
+        """
     CREATE OR REPLACE FUNCTION public.current_organization_id()
      RETURNS uuid
      LANGUAGE plpgsql
@@ -76,13 +90,14 @@ def create_function_current_organization_id(conn):
     ;
     """
     )
-    
+
     conn.execute(create_function)
 
-def define_availability_security_policies(conn):
+
+def create_availability_security_policies(conn):
     # Policy function for filtering rows based on organization membership
     availabilities_sel_policy = text(
-    """
+        """
     DO $$
     BEGIN
         IF NOT EXISTS (
@@ -101,7 +116,7 @@ def define_availability_security_policies(conn):
     )
 
     availabilities_ins_policy = text(
-    """
+        """
     DO $$
     BEGIN
         IF NOT EXISTS (
@@ -129,7 +144,7 @@ def define_availability_security_policies(conn):
     )
 
     availabilities_mod_policy = text(
-    """
+        """
     DO $$
     BEGIN
         IF NOT EXISTS (
@@ -156,9 +171,37 @@ def define_availability_security_policies(conn):
     """
     )
 
+    availabilities_del_policy = text(
+        """
+DO $$
+    BEGIN
+        IF NOT EXISTS (
+            SELECT FROM pg_catalog.pg_policies
+            WHERE  policyname = 'availabilities_del_policy') 
+        THEN
+            CREATE POLICY availabilities_del_policy ON availabilities
+            FOR delete
+            USING (
+                user_id = current_setting('app.current_user_id')::uuid 
+                OR 
+                (
+                    EXISTS (
+                        SELECT 1 FROM users u
+                        WHERE u.id = current_setting('app.current_user_id')::uuid
+                        AND u.role IN('admin', 'manager')
+                    )
+                )
+            );
+        ELSE
+            RAISE NOTICE 'Policy "availabilities_del_policy" already exists. Skipping.';
+        END IF;
+    END $$;
+    """
+    )
+
     # Enable row-level security on the availabilities table
     enable_rls_on_availabilities = text(
-    """
+        """
     ALTER TABLE availabilities ENABLE ROW LEVEL SECURITY;
     """
     )
@@ -167,12 +210,13 @@ def define_availability_security_policies(conn):
     conn.execute(availabilities_sel_policy)
     conn.execute(availabilities_ins_policy)
     conn.execute(availabilities_mod_policy)
+    conn.execute(availabilities_del_policy)
 
 
 # Obtain a connection from the engine
-with admin_engine.connect() as conn:
-    # Execute DDL statements
-    create_default_user(conn)
-    create_function_current_organization_id(conn)
-    define_availability_security_policies(conn)
-    conn.commit()
+# with admin_engine.connect() as conn:
+#     # Execute DDL statements
+#     create_default_user(conn)
+#     create_function_current_organization_id(conn)
+#     create_availability_security_policies(conn)
+#     conn.commit()

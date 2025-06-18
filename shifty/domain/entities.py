@@ -1,8 +1,9 @@
-from typing import Literal, Optional
-import uuid
+import enum
+from typing import Literal, Optional, List
 from pydantic import EmailStr
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Column, Enum, Field, SQLModel, Relationship
 from datetime import date, time, datetime, timedelta
+import uuid
 
 
 class UserOrganization(SQLModel, table=True):
@@ -40,8 +41,18 @@ class User(SQLModel, table=True):
     )
 
     shifts: list["Shift"] = Relationship(
-        back_populates="user", 
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    back_populates="user",
+        sa_relationship_kwargs={
+            "cascade": "all, delete-orphan",
+            "foreign_keys": "[Shift.user_id]"
+        }
+    )
+
+    origin_shifts: list["Shift"] = Relationship(
+        back_populates="origin_user",
+        sa_relationship_kwargs={
+            "foreign_keys": "[Shift.origin_user_id]"
+        }
     )
 
 
@@ -80,22 +91,66 @@ class Availability(SQLModel, table=True):
 
     user: Optional["User"] = Relationship(back_populates="availabilities")
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'edge',
+        'confirm_deleted_rows': False
+    }
 
-class Shift(SQLModel, table=True):
+
+
+class ShiftStatus(str, enum.Enum):
+    """
+    Enum representing the status of a shift.
+    """
+    PENDING = "pending"
+    TAKEN = "taken"
+    CANCELED = "canceled"
+
+
+class ShiftBase(SQLModel):
+    user_id: uuid.UUID
+    organization_id: uuid.UUID
+    date: date
+    start_time: time
+    end_time: time
+    note: Optional[str] = None
+    created_at: datetime
+
+
+class ShiftRead(ShiftBase):
+    id: uuid.UUID
+    origin_user_id: uuid.UUID
+    status: ShiftStatus
+    user: Optional[User] = None
+
+
+class Shift(ShiftBase, table=True):
     """
     Represents a work shift assigned to a user in an organization.
     """
     __tablename__ = "shifts"  # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="users.id")
+    origin_user_id: uuid.UUID = Field(foreign_key="users.id")
     organization_id: uuid.UUID = Field(foreign_key="organizations.id")
     date: date
     start_time: time
     end_time: time
     note: Optional[str] = None
+    status: ShiftStatus = Field(sa_column=Column(Enum(ShiftStatus)), default=ShiftStatus.PENDING)
+    parent_shift_id: Optional[uuid.UUID] = Field(default=None, foreign_key="shifts.id")
     created_at: datetime = Field(default_factory=datetime.now)
 
-    user: Optional["User"] = Relationship(back_populates="shifts")
+    user: Optional["User"] = Relationship(
+        back_populates="shifts",
+        sa_relationship_kwargs={"foreign_keys": "[Shift.user_id]"}
+    )
+
+    origin_user: Optional["User"] = Relationship(
+        back_populates="origin_shifts",
+        sa_relationship_kwargs={"foreign_keys": "[Shift.origin_user_id]"}
+    )
+    
     overrides: list["Override"] = Relationship(
         back_populates="shift", 
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
@@ -134,7 +189,7 @@ class Override(SQLModel, table=True):
     is_taken: bool = Field(default=False)
 
     # Relationships (optional, for ORM navigation)
-    shift: Optional["Shift"] = Relationship(back_populates="overrides")
+    shift: Optional[Shift] = Relationship(back_populates="overrides")
     requester: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.requester_id]"})
     taken_by: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.taken_by_id]"})
 

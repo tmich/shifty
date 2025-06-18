@@ -1,10 +1,10 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from typing import List
 from sqlmodel import Session
 
 from shifty.application.dto.override_dto import OverrideCreate, OverrideRead, OverrideTake
-from shifty.domain.entities import Override
+from shifty.domain.entities import Override, ShiftRead
 from shifty.infrastructure.db import get_session
 from shifty.infrastructure.repositories.override_sqlalchemy import OverrideRepository
 from shifty.infrastructure.repositories.shift_sqlalchemy import ShiftRepository
@@ -46,13 +46,21 @@ def get_override(override_id: UUID, service: OverrideService = Depends(get_overr
     except ValueError:
         raise HTTPException(status_code=404, detail="Override not found")
 
-@router.post("/{override_id}/take", response_model=OverrideRead)
+@router.post("/{override_id}/take", response_model=List[ShiftRead])
 def take_override(
     override_id: UUID,
     data: OverrideTake,
     service: OverrideService = Depends(get_override_service)
 ):
     try:
-        return service.take(override_id, data.taken_by_id)
+        return service.take(override_id, data)
     except (ValueError, InvalidOverrideException) as ex:
         raise HTTPException(status_code=400, detail=str(ex))
+
+@router.options("/")
+def options_overrides():
+    return Response(status_code=204, headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "*"
+    })

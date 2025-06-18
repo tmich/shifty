@@ -1,23 +1,22 @@
 meta {
-  name: Create shift
+  name: Create overlapping availability forbidden
   type: http
-  seq: 1
+  seq: 10
 }
 
 post {
-  url: http://{{HOST}}:{{PORT}}/shifts
+  url: http://{{HOST}}:{{PORT}}/availabilities
   body: json
   auth: inherit
 }
 
 body:json {
   {
+    "end_time": "15:00:00",
     "user_id": "9561cdd0-65ca-4e28-8a5a-7e2a340d1028",
-    "origin_user_id": "9561cdd0-65ca-4e28-8a5a-7e2a340d1028",
     "organization_id": "5013a720-38ec-4586-abe2-c66533143bad",
     "date": "2025-06-25",
     "start_time": "09:00:00",
-    "end_time": "18:00:00",
-    "note": "My beautiful beautiful shift"
+    "note": "nuova disponibilità"
   }
 }

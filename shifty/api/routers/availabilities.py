@@ -1,6 +1,6 @@
 from uuid import UUID
 from datetime import date, time
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from shifty.application.dto.availability_dto import AvailabilityCreate, AvailabilityFull, AvailabilityResult, AvailabilityUpdate
 from shifty.application.use_cases.availability_service import AvailabilityService
 from shifty.dependencies import get_availability_service
@@ -30,7 +30,7 @@ def create_availability(
         )
         
 
-@router.get("/", response_model=list[Availability])
+@router.get("/", response_model=list[AvailabilityFull])
 def list_availabilities(
     service: AvailabilityService = Depends(get_availability_service),
 ):
@@ -57,7 +57,7 @@ def delete_availability(
     except NotExistsException:
         response.status_code = status.HTTP_404_NOT_FOUND
 
-@router.get("/{availability_id}", response_model=Availability|None)
+@router.get("/{availability_id}", response_model=AvailabilityFull|None)
 def get_availability(
     availability_id: UUID,
     response: Response,
@@ -66,19 +66,21 @@ def get_availability(
     try:
         return service.get_by_id(availability_id)
     except NotExistsException:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return None
+        raise HTTPException(status_code=404, detail="Availability not found")
 
-@router.put("/{availability_id}", response_model=Availability)
+@router.put("/{availability_id}", response_model=AvailabilityFull)
 def update_availability(
     availability_id: UUID,
     data: AvailabilityUpdate,
     service: AvailabilityService = Depends(get_availability_service)
 ):
-    service.update(availability_id, data)
-    return service.get_by_id(availability_id)
+    try:
+        return service.update(availability_id, data)
+    except NotExistsException:
+        raise HTTPException(status_code=404, detail="Availability not found")
+    
 
-@router.get("/user/{user_id}", response_model=list[Availability])
+@router.get("/user/{user_id}", response_model=list[AvailabilityFull])
 def get_availabilities_by_user(
     user_id: UUID,
     response: Response,
@@ -90,7 +92,7 @@ def get_availabilities_by_user(
         return []
     return availabilities_by_user
 
-@router.get("/user/{user_id}/date/{date}", response_model=list[Availability])
+@router.get("/user/{user_id}/date/{date}", response_model=list[AvailabilityFull])
 def get_availabilities_by_user_and_date(
     user_id: UUID,
     date: date,  # Assuming date is passed as a string in 'YYYY-MM-DD' format
@@ -118,3 +120,11 @@ def get_availabilities_by_date(
         response.status_code = status.HTTP_404_NOT_FOUND
         return []
     return availabilities
+
+@router.options("/")
+def options_availabilities():
+    return Response(status_code=204, headers={
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "*"
+    })
