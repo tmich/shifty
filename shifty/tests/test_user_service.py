@@ -18,6 +18,7 @@ def make_user(role="worker"):
         id=uuid4(),
         full_name="Test User",
         email="test@example.com",
+        organization_id=uuid4(),
         role=role,
         is_active=True,
         created_at=datetime.datetime.now(),

@@ -1,14 +1,13 @@
 import pytest
 from uuid import uuid4
-from datetime import date, time, datetime, timedelta
+from datetime import date, timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel, create_engine
 
-from shifty.domain.entities import Availability
 from shifty.infrastructure.db import get_session
 from shifty.main import app
-from shifty.application.dto.availability_dto import AvailabilityCreate
+
 
 # Use an in-memory SQLite database for testing
 TEST_DB_URL = "sqlite:///./test.db"

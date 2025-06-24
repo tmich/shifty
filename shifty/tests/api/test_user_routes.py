@@ -2,9 +2,6 @@ import os
 import uuid
 from fastapi.testclient import TestClient
 from shifty.main import app
-from shifty.domain.entities import User
-from sqlmodel import SQLModel, Session, create_engine
-import pytest
 
 from shifty.security.dependencies import get_current_user_id
 

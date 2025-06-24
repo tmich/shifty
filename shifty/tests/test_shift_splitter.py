@@ -19,7 +19,8 @@ def test_split_shift_for_partial_override():
     override = Override(
         id=uuid4(),
         shift_id=shift.id,
-        requester_id=shift.user_id,
+        organization_id=shift.organization_id,
+        user_id=shift.user_id,
         date=shift.date,
         start_time=time(9, 0),
         end_time=time(13, 0),

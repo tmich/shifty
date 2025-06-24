@@ -1,6 +1,5 @@
 from sqlmodel import Session, select
 from shifty.domain.entities import Auth
-from uuid import UUID
 from typing import Optional
 
 class AuthRepository:
@@ -23,4 +22,10 @@ class AuthRepository:
             self.session.add(auth)
             self.session.commit()
             self.session.refresh(auth)
+        return auth
+
+    def update(self, auth: Auth) -> Auth:
+        self.session.add(auth)
+        self.session.commit()
+        self.session.refresh(auth)
         return auth

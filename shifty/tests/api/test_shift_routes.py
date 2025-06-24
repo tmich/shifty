@@ -5,7 +5,6 @@ from uuid import uuid4
 from datetime import datetime
 from shifty.security.dependencies import get_current_user_id
 from unittest.mock import patch
-import json
 
 client = TestClient(app)
 

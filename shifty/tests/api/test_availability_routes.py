@@ -2,7 +2,7 @@ import pytest
 from uuid import uuid4
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from shifty.api.routers import availabilities
 from shifty.domain.exceptions import NotExistsException
 

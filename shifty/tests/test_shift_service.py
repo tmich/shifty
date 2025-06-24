@@ -1,11 +1,10 @@
-import os
 import pytest
 from unittest.mock import MagicMock
 from uuid import uuid4
 from datetime import date, time, datetime
 
 from shifty.application.use_cases.shift_service import ShiftService
-from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult
+from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest
 from shifty.domain.entities import Availability, Shift, ShiftType
 from shifty.domain.exceptions import NotExistsException
 

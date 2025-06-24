@@ -1,5 +1,5 @@
 import enum
-from typing import Literal, Optional, List
+from typing import Optional
 from pydantic import EmailStr
 from sqlmodel import Column, Enum, Field, SQLModel, Relationship
 from datetime import date, time, datetime, timedelta
@@ -160,16 +160,16 @@ class Shift(ShiftBase, table=True):
         back_populates="origin_shifts",
         sa_relationship_kwargs={"foreign_keys": "[Shift.origin_user_id]"}
     )
-    
+
     overrides: list["Override"] = Relationship(
-        back_populates="shift", 
+        back_populates="shift",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
 
 
 class ShiftType(SQLModel, table=True):
     """ Represents a shift type in an organization """
-    
+
     __tablename__ = "shift_types"  # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     organization_id: uuid.UUID = Field(foreign_key="organizations.id")
@@ -203,7 +203,7 @@ class Override(SQLModel, table=True):
     # Relationships (optional, for ORM navigation)
     shift: Optional[Shift] = Relationship(back_populates="overrides")
     user: Optional["User"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[Override.user_id]"}, 
+        sa_relationship_kwargs={"foreign_keys": "[Override.user_id]"},
     )
     taken_by: Optional["User"] = Relationship(sa_relationship_kwargs={"foreign_keys": "[Override.taken_by_id]"})
 
@@ -214,6 +214,8 @@ class Auth(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     username: str = Field(index=True, unique=True)
     password_hash: str
+    refresh_token: Optional[str] = None
+    refresh_token_expiry: Optional[datetime] = None
     is_valid: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None

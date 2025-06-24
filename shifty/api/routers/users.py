@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from typing import List
 from uuid import UUID
 from shifty.application.use_cases.user_service import UserService

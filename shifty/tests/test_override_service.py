@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import date, time, datetime
 
 from shifty.application.use_cases.override_service import OverrideService
-from shifty.application.dto.override_dto import OverrideCreate, OverrideTake, OverrideUpdate
+from shifty.application.dto.override_dto import OverrideCreate, OverrideTake
 from shifty.domain.entities import Override, Shift, ShiftStatus
 
 @pytest.fixture

@@ -1,5 +1,4 @@
 from uuid import uuid4
-import pytest
 from fastapi.testclient import TestClient
 from shifty.main import app
 
