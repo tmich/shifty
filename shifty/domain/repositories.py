@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import List, Optional
 from uuid import UUID
-from datetime import date
 from shifty.application.dto.availability_dto import AvailabilityUpdate
 from shifty.domain.entities import Availability, User, Shift, ShiftSlot
 

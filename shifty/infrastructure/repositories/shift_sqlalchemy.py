@@ -1,6 +1,5 @@
 from typing import List, Optional
 from uuid import UUID
-from datetime import date
 from sqlmodel import Session, select
 from shifty.domain.entities import Shift, ShiftSlot
 from shifty.domain.repositories import ShiftRepositoryInterface

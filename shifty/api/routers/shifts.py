@@ -1,12 +1,13 @@
 from uuid import UUID
 from datetime import date
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response
 from shifty.dependencies import get_shift_service
 from shifty.domain.entities import Shift, ShiftRead, ShiftSlot
 from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult, ShiftBulkCreate, ShiftSlotCreate, ShiftSlotUpdate, ShiftSlotOut
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.domain.exceptions import NotExistsException
+from shifty.security.dependencies import get_current_user_id
 
 router = APIRouter(prefix="/shifts", tags=["shifts"])
 
@@ -79,7 +80,10 @@ def update_shift(
         raise HTTPException(status_code=404, detail="Shift not found")
 
 @router.get("/slots/all", response_model=List[ShiftSlot])
-def get_shift_slots(service: ShiftService = Depends(get_shift_service)):
+def get_shift_slots(
+    service: ShiftService = Depends(get_shift_service),
+    current_user_id: str = Depends(get_current_user_id)
+):
     return service.get_shift_slots()
 
 @router.get("/slots/organization/{organization_id}", response_model=List[ShiftSlotOut])

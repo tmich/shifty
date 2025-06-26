@@ -2,7 +2,7 @@ import os
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, text
 from dotenv import load_dotenv
 from shifty.api.routers import availabilities, shifts, overrides, users, auth, registration
 
@@ -131,7 +131,7 @@ async def health_check():
     try:
         # Test database connection
         with admin_engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
         
         return {
             "status": "healthy",
