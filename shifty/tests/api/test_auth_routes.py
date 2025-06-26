@@ -1,11 +1,7 @@
 import pytest
-from fastapi.testclient import TestClient
-from shifty.main import app
 from uuid import uuid4
 
-client = TestClient(app)
-
-def test_signup_and_login():
+def test_signup_and_login(client):
     email = f"user{uuid4()}@test.com"
     password = "testpassword123"
     # Signup
@@ -23,7 +19,7 @@ def test_signup_and_login():
     resp3 = client.post("/auth/login", json={"username": email, "password": "wrongpass"})
     assert resp3.status_code == 401
 
-def test_refresh_token_flow():
+def test_refresh_token_flow(client):
     email = f"user{uuid4()}@test.com"
     password = "testpassword123"
     # Signup

@@ -64,7 +64,7 @@ uvicorn shifty.main:app --reload
 ### 3. Run tests
 
 ```bash
-pytest
+python -m pytest shifty/tests/
 ```
 
 ## 📂 Project Structure

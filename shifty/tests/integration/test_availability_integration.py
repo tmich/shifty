@@ -1,48 +1,8 @@
 import pytest
 from uuid import uuid4
 from datetime import date, timedelta
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel, create_engine
 
-from shifty.infrastructure.db import get_session
-from shifty.main import app
-
-
-# Use an in-memory SQLite database for testing
-TEST_DB_URL = "sqlite:///./test.db"
-engine = create_engine(TEST_DB_URL)
-TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-@pytest.fixture(scope="function")
-def setup_db():
-    SQLModel.metadata.create_all(engine)
-    yield
-    SQLModel.metadata.drop_all(engine)
-
-@pytest.fixture
-def test_session(setup_db):
-    session = TestSessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
-
-@pytest.fixture
-def client(test_session):
-    # Override the get_session dependency
-    def override_get_session():
-        try:
-            yield test_session
-        finally:
-            pass
-    
-    app.dependency_overrides[get_session] = override_get_session
-    yield TestClient(app)
-    app.dependency_overrides = {}
-
-@pytest.fixture
-def test_create_and_delete_availability(client, test_session):
+def test_create_and_delete_availability(client):
     """Test creating an availability and then deleting it"""
     user_id = uuid4()
     org_id = uuid4()

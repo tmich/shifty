@@ -5,7 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import date
 from shifty.application.dto.availability_dto import AvailabilityUpdate
-from shifty.domain.entities import Availability, User, Shift, ShiftType
+from shifty.domain.entities import Availability, User, Shift, ShiftSlot
 
 # Repository interface for managing Availability entities
 class AvailabilityRepositoryInterface(ABC):
@@ -149,9 +149,9 @@ class ShiftRepositoryInterface(ABC):
     def get_by_date(self, date: date) -> List[Shift]:
         raise NotImplementedError
 
-    def get_shift_types(self) -> List[ShiftType]:
+    def get_shift_slots(self) -> List[ShiftSlot]:
         raise NotImplementedError
-    
+
     def get_by_user(self, user_id: UUID) -> List[Shift]:
         """
         Get all shifts for a specific user.
@@ -159,7 +159,7 @@ class ShiftRepositoryInterface(ABC):
         :return: List of Shift entities for the specified user.
         """
         raise NotImplementedError
-    
+
     def get_by_user_and_date(self, user_id: UUID, date: date) -> List[Shift]:
         """
         Get all shifts for a specific user on a specific date.
@@ -168,7 +168,7 @@ class ShiftRepositoryInterface(ABC):
         :return: List of Shift entities for the specified user and date.
         """
         raise NotImplementedError
-    
+
     def update(self, shift_id: UUID, data: dict) -> Shift:
         """
         Update an existing Shift entity.

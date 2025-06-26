@@ -9,9 +9,9 @@ import random
 import copy
 
 class ShiftService:
-    def __init__(self, 
-                 repository: ShiftRepositoryInterface, 
-                 availability_repository: AvailabilityRepositoryInterface, 
+    def __init__(self,
+                 repository: ShiftRepositoryInterface,
+                 availability_repository: AvailabilityRepositoryInterface,
                  user_repository: UserRepositoryInterface):
         self.repository = repository
         self.availability_repository = availability_repository
@@ -23,7 +23,7 @@ class ShiftService:
         for s in existing_shifts:
             if not (data.end_time <= s.start_time or data.start_time >= s.end_time):
                 raise OverlappingShiftException("Cannot create overlapping shift for the same owner.")
-            
+
         shift = Shift(
             user_id=data.user_id,
             # parent_shift_id=data.parent_shift_id,
@@ -79,19 +79,19 @@ class ShiftService:
         except ValueError:
             raise NotExistsException("Shift not found")
 
-    def get_shift_types(self):
-        return self.repository.get_shift_types()
+    def get_shift_slots(self):
+        return self.repository.get_shift_slots()
 
     def calculate_shifts(self, request: ShiftCalculationRequest) -> list[ShiftCalculationResult]:
         availabilities = self.availability_repository.get_by_date(request.date)
-        shift_types = self.repository.get_shift_types()
+        shift_slots = self.repository.get_shift_slots()
         assigned_users = set()
         results = []
         all_users = [u.id for u in self.user_repository.get_by_role("worker")]
-        for shift_type in shift_types:
-            shift_start = shift_type.start_time
-            shift_end = shift_type.end_time
-            needed = getattr(shift_type, 'expected_workers', 1)
+        for shift_slot in shift_slots:
+            shift_start = shift_slot.start_time
+            shift_end = shift_slot.end_time
+            needed = getattr(shift_slot, 'expected_workers', 1)
             assigned_for_this_shift = 0
             # Try to cover the shift with available users (no user can do more than one shift)
             for a in availabilities:
@@ -104,7 +104,7 @@ class ShiftService:
                         organization_id=request.organization_id,
                         date=request.date,
                         created_at=datetime.now(),
-                        shift_type=shift_type,
+                        shift_type=shift_slot,
                         start_time=shift_start,
                         end_time=shift_end,
                         user=self.user_repository.get_by_id(a.user_id)
@@ -123,7 +123,7 @@ class ShiftService:
                     organization_id=request.organization_id,
                     date=request.date,
                     created_at=datetime.now(),
-                    shift_type=shift_type,
+                    shift_type=shift_slot,
                     start_time=shift_start,
                     end_time=shift_end,
                     user=self.user_repository.get_by_id(chosen_user_id)

@@ -1,10 +1,6 @@
 from uuid import uuid4
-from fastapi.testclient import TestClient
-from shifty.main import app
 
-client = TestClient(app)
-
-def test_register_organization_and_join():
+def test_register_organization_and_join(client):
     # Register new org
     rnd = str(uuid4())[6:12]
     resp = client.post("/register/organization", json={

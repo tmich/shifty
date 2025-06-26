@@ -2,7 +2,7 @@ from datetime import date, time, datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
-from shifty.domain.entities import ShiftType, ShiftBase, User
+from shifty.domain.entities import ShiftSlot, ShiftBase, User
 
 
 class ShiftCreate(BaseModel):
@@ -21,11 +21,11 @@ class ShiftCalculationRequest(BaseModel):
 
 
 class ShiftCalculationResult(ShiftBase):
-    shift_type: Optional[ShiftType] = None
+    shift_type: Optional[ShiftSlot] = None
     user: User | None = None
 
 
-class ShiftTypeOut(BaseModel):
+class ShiftSlotOut(BaseModel):
     id: UUID
     organization_id: UUID
     name: str
@@ -43,4 +43,3 @@ class ShiftTypeOut(BaseModel):
 
 class ShiftBulkCreate(BaseModel):
     shifts: list[ShiftCreate]
-

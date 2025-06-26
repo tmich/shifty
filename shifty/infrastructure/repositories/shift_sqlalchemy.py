@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
-from shifty.domain.entities import Shift, ShiftType
+from shifty.domain.entities import Shift, ShiftSlot
 from shifty.domain.repositories import ShiftRepositoryInterface
 
 
@@ -51,5 +51,5 @@ class ShiftRepository(ShiftRepositoryInterface):
         self.session.refresh(shift)
         return shift
 
-    def get_shift_types(self) -> List[ShiftType]:
-        return list(self.session.exec(select(ShiftType)).all())
+    def get_shift_slots(self) -> List[ShiftSlot]:
+        return list(self.session.exec(select(ShiftSlot)).all())

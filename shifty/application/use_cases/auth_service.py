@@ -65,7 +65,7 @@ class AuthService:
 
     def verify_refresh_token(self, username: str, refresh_token: str) -> Optional[Auth]:
         auth = self.repository.get_by_username(username)
-        now = dt.datetime.now(timezone.utc)
+        now = dt.datetime.now()
         if (
             auth and
             auth.refresh_token == refresh_token and

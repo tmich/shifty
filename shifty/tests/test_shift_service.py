@@ -5,7 +5,7 @@ from datetime import date, time, datetime
 
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest
-from shifty.domain.entities import Availability, Shift, ShiftType
+from shifty.domain.entities import Availability, Shift, ShiftSlot
 from shifty.domain.exceptions import NotExistsException
 
 @pytest.fixture
@@ -56,8 +56,8 @@ def make_create_dto():
         note="test"
     )
 
-def make_shift_type():
-    return ShiftType(
+def make_shift_slot():
+    return ShiftSlot(
         id=uuid4(),
         organization_id=uuid4(),
         name="Morning",
@@ -160,12 +160,12 @@ def test_update_not_found(service, mock_repository):
     with pytest.raises(NotExistsException):
         service.update(shift_id, data)
 
-def test_get_shift_types(service, mock_repository):
-    expected = [make_shift_type()]
-    mock_repository.get_shift_types.return_value = expected
-    result = service.get_shift_types()
+def test_get_shift_slots(service, mock_repository):
+    expected = [make_shift_slot()]
+    mock_repository.get_shift_slots.return_value = expected
+    result = service.get_shift_slots()
     assert result == expected
-    mock_repository.get_shift_types.assert_called_once()
+    mock_repository.get_shift_slots.assert_called_once()
 
 def test_calculate_shifts(service, mock_availability_repository, mock_user_repository, mock_repository):
     from datetime import date, time
@@ -181,8 +181,8 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
         make_availability(user2, org_id, date.today(), time(12,0), time(16,0), "Afternoon"),
     ]
 
-    mock_shift_types = [
-        ShiftType(
+    mock_shift_slots = [
+        ShiftSlot(
             id=uuid4(),
             organization_id=org_id,
             name="Morning",
@@ -194,7 +194,7 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
             created_at=datetime.now(),
             updated_at=None
         ),
-        ShiftType(
+        ShiftSlot(
             id=uuid4(),
             organization_id=org_id,
             name="Afternoon",
@@ -202,26 +202,26 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
             end_time=time(16, 0),
             description="Afternoon shift",
             is_active=True,
-            expected_workers = 2,
+            expected_workers = 1,
             created_at=datetime.now(),
             updated_at=None
         ),
-        ShiftType(
+        ShiftSlot(
             id=uuid4(),
             organization_id=org_id,
-            name="Evening",
+            name="Night",
             start_time=time(16, 0),
             end_time=time(20, 0),
-            description="Evening shift",
+            description="Night shift",
             is_active=True,
-            expected_workers = 2,
+            expected_workers = 1,
             created_at=datetime.now(),
             updated_at=None
-        )
+        ),
     ]
 
-    # Mocking the repository to return the shift types
-    mock_repository.get_shift_types.return_value = mock_shift_types
+    # Mocking the repository to return the shift slots
+    mock_repository.get_shift_slots.return_value = mock_shift_slots
 
     # Mocking the availability repository to return the availabilities
     mock_availability_repository.get_by_date.return_value = availabilities
@@ -238,10 +238,10 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
 
     # Mocking the user repository to return user details by ID
     mock_user_repository.get_by_id.side_effect = lambda user_id: type('U', (), {
-        "id": user_id, 
-        "full_name": f"User {user_id}", 
-        "email" : "test@test.com", 
-        "role": "worker", 
+        "id": user_id,
+        "full_name": f"User {user_id}",
+        "email" : "test@test.com",
+        "role": "worker",
         "organization_id": org_id})()
 
     req = ShiftCalculationRequest(
@@ -250,15 +250,15 @@ def test_calculate_shifts(service, mock_availability_repository, mock_user_repos
     )
 
     result = service.calculate_shifts(req)
-    # Should return expected_workers for each shift type
-    for st in mock_shift_types:
+    # Should return expected_workers for each shift slot
+    for st in mock_shift_slots:
         count = sum(1 for r in result if r.shift_type.name == st.name)
-        assert count == st.expected_workers, f"Shift type {st.name} should have {st.expected_workers} workers, got {count}"
+        assert count == st.expected_workers, f"Shift slot {st.name} should have {st.expected_workers} workers, got {count}"
     # Each user gets at most one shift
     user_ids = [r.user_id for r in result]
     assert len(set(user_ids)) == len(user_ids) or len(set(user_ids)) == 2
     # Each result covers the correct time
     for r in result:
-        st = next(st for st in mock_repository.get_shift_types.return_value if st.name == r.shift_type.name)
+        st = next(st for st in mock_repository.get_shift_slots.return_value if st.name == r.shift_type.name)
         assert r.start_time == st.start_time
         assert r.end_time == st.end_time

@@ -1,4 +1,14 @@
 import os
+# Use DATABASE_URL if set, otherwise fall back to Postgres
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    f"postgresql+psycopg2://{os.getenv('SHIFTY_USER', 'shifty_user')}:{os.getenv('SHIFTY_PASSWORD', 'pwd')}@localhost:5431/{os.getenv('SHIFTY_DB', 'shiftydb')}"
+)
+ADMIN_DATABASE_URL = os.getenv(
+    "ADMIN_DATABASE_URL",
+    f"postgresql+psycopg2://postgres:postgres@localhost:5431/{os.getenv('SHIFTY_DB', 'shiftydb')}"
+)
+
 from typing import Generator
 from fastapi import Depends
 from sqlalchemy import Connection
@@ -9,19 +19,19 @@ from shifty.infrastructure.security_policies import all_policies
 from shifty.infrastructure.roles import all_roles
 
 
-# create a new postgresql database
-admin_engine = create_engine(
-    f"postgresql+psycopg2://postgres:postgres@localhost:5431/{os.getenv('SHIFTY_DB', 'shiftydb')}",
-    isolation_level="READ UNCOMMITTED",  # Use READ UNCOMMITTED to avoid locking issues during schema changes
-    echo=True,  # Enable SQLAlchemy logging
-    future=True,  # Use future=True for SQLModel compatibility
-)
 engine = create_engine(
-    f"postgresql+psycopg2://{os.getenv('SHIFTY_USER', 'shifty_user')}:{os.getenv('SHIFTY_PASSWORD', 'pwd')}@localhost:5431/{os.getenv('SHIFTY_DB', 'shiftydb')}",
-    isolation_level="READ UNCOMMITTED",  # Use READ UNCOMMITTED to avoid locking issues during schema changes
-    echo=True,  # Enable SQLAlchemy logging
-    future=True,  # Use future=True for SQLModel compatibility
+    DATABASE_URL,
+    isolation_level="READ UNCOMMITTED", # Use READ UNCOMMITTED to avoid locking issues during schema changes
+    echo=True, # Enable SQLAlchemy logging
+    future=True, # Use future=True for SQLModel compatibility
 )
+admin_engine = create_engine(
+    ADMIN_DATABASE_URL,
+    isolation_level="READ UNCOMMITTED", # Use READ UNCOMMITTED to avoid locking issues during schema changes
+    echo=True, # Enable SQLAlchemy logging
+    future=True, # Use future=True for SQLModel compatibility
+)
+
 
 # Disable the "sane rowcount" feature for psycopg2
 # This is necessary because psycopg2 does not support the `RETURNING` clause in all cases

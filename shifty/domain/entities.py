@@ -167,17 +167,17 @@ class Shift(ShiftBase, table=True):
     )
 
 
-class ShiftType(SQLModel, table=True):
-    """ Represents a shift type in an organization """
+class ShiftSlot(SQLModel, table=True):
+    """ Represents a shift slot in an organization """
 
-    __tablename__ = "shift_types"  # type: ignore
+    __tablename__ = "shift_slots"  # type: ignore
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     organization_id: uuid.UUID = Field(foreign_key="organizations.id")
     name: str   # The name of the shift (e.g., "Morning")
     start_time: time = datetime.now().time()  # Start time of the shift
     end_time: time = (datetime.now() + timedelta(hours=8)).time()  # End time of the shift
     description: Optional[str] = None  # Additional description or notes
-    expected_workers: int = Field(default=1)  # Minimum number of workers for this shift type
+    expected_workers: int = Field(default=1)  # Minimum number of workers for this shift slot
     is_active: bool = Field(default=True) # Whether the slot is currently available
     created_at: datetime = Field(default_factory=datetime.now)  # When the slot was created
     updated_at: Optional[datetime] = None  # When the slot was last updated

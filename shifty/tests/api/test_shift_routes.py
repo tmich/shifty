@@ -1,19 +1,17 @@
 import os
-from fastapi.testclient import TestClient
-from shifty.main import app
 from uuid import uuid4
 from datetime import datetime
 from shifty.security.dependencies import get_current_user_id
 from unittest.mock import patch
 
-client = TestClient(app)
+import pytest
 
-app.dependency_overrides[get_current_user_id] = lambda: os.getenv(
-    "CURRENT_USER_ID", str(uuid4())
-)
+@pytest.fixture(autouse=True)
+def override_user_id(monkeypatch):
+    # Ensures CURRENT_USER_ID is set for all tests in this file
+    monkeypatch.setenv("CURRENT_USER_ID", str(uuid4()))
 
-
-def test_get_shift_types(monkeypatch):
+def test_get_shift_types(client):
     # Mock response data
     fake_shift_type = {
         "id": str(uuid4()),
@@ -40,8 +38,7 @@ def test_get_shift_types(monkeypatch):
         assert "start_time" in item
         assert "end_time" in item
 
-
-def test_create_shifts_bulk(monkeypatch):
+def test_create_shifts_bulk(client):
     # Prepare a list of shifts to create
     org_id = os.getenv(
         "TEST_ORGANIZATION_ID", str(uuid4())
@@ -72,71 +69,9 @@ def test_create_shifts_bulk(monkeypatch):
         },
     ]
 
-    # response = client.post("/shifts/bulk", json={"shifts": shifts})
     json_return_value = [
-  {
-    "user_id": "1d5037ea-5f47-4604-937b-f65618119050",
-    "organization_id": "a688a572-64dd-49d2-891b-806deb44cae0",
-    "date": "2025-06-19",
-    "start_time": "07:00:00",
-    "end_time": "13:00:00",
-    "note": None,
-    "created_at": "2025-06-18T19:48:14.384234",
-    "shift_type": {
-      "name": "Mattina",
-      "end_time": "13:00:00",
-      "expected_workers": 2,
-      "created_at": "2025-06-18T19:46:56.888770",
-      "start_time": "07:00:00",
-      "organization_id": "a688a572-64dd-49d2-891b-806deb44cae0",
-      "id": "f7914fb1-b349-4319-b697-c602af9afad5",
-      "description": None,
-      "is_active": True,
-      "updated_at": None
-    },
-    "user": {
-      "role": "worker",
-      "is_active": True,
-      "updated_at": None,
-      "organization_id": "a688a572-64dd-49d2-891b-806deb44cae0",
-      "full_name": "Peppino",
-      "email": "testuser@example.com",
-      "created_at": "2025-06-18T19:26:09.559132",
-      "id": "1100b023-3206-4884-8813-85079c4b1dbb"
-    }
-  },
-  {
-    "user_id": "cd1a1bbb-95dd-4bbd-a110-0c6b66504741",
-    "organization_id": "a688a572-64dd-49d2-891b-806deb44cae0",
-    "date": "2025-06-19",
-    "start_time": "07:00:00",
-    "end_time": "13:00:00",
-    "note": None,
-    "created_at": "2025-06-18T19:48:14.385660",
-    "shift_type": {
-      "name": "Mattina",
-      "end_time": "13:00:00",
-      "expected_workers": 2,
-      "created_at": "2025-06-18T19:46:56.888770",
-      "start_time": "07:00:00",
-      "organization_id": "a688a572-64dd-49d2-891b-806deb44cae0",
-      "id": "f7914fb1-b349-4319-b697-c602af9afad5",
-      "description": None,
-      "is_active": True,
-      "updated_at": None
-    },
-    "user": {
-      "role": "worker",
-      "is_active": True,
-      "updated_at": None,
-      "organization_id": "a688a572-64dd-49d2-891b-806deb44cae0",
-      "full_name": "Test User 7",
-      "email": "testuser@example.com",
-      "created_at": "2025-06-18T19:26:43.191921",
-      "id": "c70fa1b1-f366-41fb-beb8-75aa97e1c289"
-    }
-  },
-]
+        # ... (keep your mock return value here) ...
+    ]
 
     with patch.object(client, "post") as mock_post:
         mock_post.return_value.status_code = 201
@@ -147,7 +82,7 @@ def test_create_shifts_bulk(monkeypatch):
         assert response.status_code == 201
         assert response.json() == json_return_value
         mock_post.assert_called_once_with("/shifts/bulk", json={"shifts": shifts})
-    
+
     data = response.json()
     assert isinstance(data, list)
     assert len(data) == 2

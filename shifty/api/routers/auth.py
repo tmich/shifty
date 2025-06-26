@@ -17,7 +17,8 @@ def signup(data: SignupRequest, service: AuthService = Depends(get_auth_service)
     auth: Auth = service.signup(data.username, data.password)
     token = service.create_jwt(str(auth.id))
     refresh_token = auth.refresh_token if auth.refresh_token is not None else ""
-    return TokenResponse(access_token=token, refresh_token=refresh_token)
+    token_response = TokenResponse(access_token=token, refresh_token=refresh_token)
+    return token_response
 
 @router.post("/login", response_model=TokenResponse)
 def login(data: LoginRequest, service: AuthService = Depends(get_auth_service)):

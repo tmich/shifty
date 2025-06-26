@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from shifty.dependencies import get_shift_service
-from shifty.domain.entities import Shift, ShiftRead, ShiftType
+from shifty.domain.entities import Shift, ShiftRead, ShiftSlot
 from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult, ShiftBulkCreate
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.domain.exceptions import NotExistsException
@@ -24,7 +24,7 @@ def create_shift(
     except Exception as e:
         # Handle exceptions, e.g., overlapping shifts
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 
 @router.get("/", response_model=List[ShiftRead])
 def list_shifts(service: ShiftService = Depends(get_shift_service)):
@@ -78,9 +78,9 @@ def update_shift(
     except NotExistsException:
         raise HTTPException(status_code=404, detail="Shift not found")
 
-@router.get("/types/all", response_model=List[ShiftType])
-def get_shift_types(service: ShiftService = Depends(get_shift_service)):
-    return service.get_shift_types()
+@router.get("/slots/all", response_model=List[ShiftSlot])
+def get_shift_slots(service: ShiftService = Depends(get_shift_service)):
+    return service.get_shift_slots()
 
 @router.options("/")
 def options_shifts():
