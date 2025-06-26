@@ -4,7 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from shifty.dependencies import get_shift_service
 from shifty.domain.entities import Shift, ShiftRead, ShiftSlot
-from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult, ShiftBulkCreate
+from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult, ShiftBulkCreate, ShiftSlotCreate, ShiftSlotUpdate, ShiftSlotOut
 from shifty.application.use_cases.shift_service import ShiftService
 from shifty.domain.exceptions import NotExistsException
 
@@ -81,6 +81,49 @@ def update_shift(
 @router.get("/slots/all", response_model=List[ShiftSlot])
 def get_shift_slots(service: ShiftService = Depends(get_shift_service)):
     return service.get_shift_slots()
+
+@router.get("/slots/organization/{organization_id}", response_model=List[ShiftSlotOut])
+def get_shift_slots_by_organization(organization_id: UUID, service: ShiftService = Depends(get_shift_service)):
+    return service.get_shift_slots_by_organization(organization_id)
+
+@router.post("/slots", response_model=ShiftSlotOut, status_code=201)
+def create_shift_slot(
+    data: ShiftSlotCreate,
+    service: ShiftService = Depends(get_shift_service)
+):
+    try:
+        shift_slot = service.create_shift_slot(data)
+        return shift_slot
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/slots/{shift_slot_id}", response_model=ShiftSlotOut)
+def get_shift_slot(shift_slot_id: UUID, service: ShiftService = Depends(get_shift_service)):
+    try:
+        return service.get_shift_slot_by_id(shift_slot_id)
+    except NotExistsException:
+        raise HTTPException(status_code=404, detail="Shift slot not found")
+
+@router.put("/slots/{shift_slot_id}", response_model=ShiftSlotOut)
+def update_shift_slot(
+    shift_slot_id: UUID,
+    data: ShiftSlotUpdate,
+    service: ShiftService = Depends(get_shift_service)
+):
+    try:
+        updated_slot = service.update_shift_slot(shift_slot_id, data)
+        return updated_slot
+    except NotExistsException:
+        raise HTTPException(status_code=404, detail="Shift slot not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/slots/{shift_slot_id}", status_code=204)
+def delete_shift_slot(shift_slot_id: UUID, response: Response, service: ShiftService = Depends(get_shift_service)):
+    try:
+        service.delete_shift_slot(shift_slot_id)
+    except NotExistsException:
+        raise HTTPException(status_code=404, detail="Shift slot not found")
 
 @router.options("/")
 def options_shifts():

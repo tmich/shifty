@@ -3,7 +3,11 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlmodel import SQLModel
+from dotenv import load_dotenv
 from shifty.api.routers import availabilities, shifts, overrides, users, auth, registration
+
+# Load environment variables from .env file
+load_dotenv()
 from shifty.infrastructure.db import (
     admin_engine, 
     create_all_functions,

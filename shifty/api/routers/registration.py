@@ -8,13 +8,15 @@ from shifty.application.use_cases.registration_service import RegistrationServic
 from shifty.infrastructure.repositories.auth_sqlalchemy import AuthRepository
 from shifty.infrastructure.repositories.registration_sqlalchemy import RegistrationRepository
 from shifty.infrastructure.repositories.user_sqlalchemy import UserRepository
+from shifty.infrastructure.repositories.shift_sqlalchemy import ShiftRepository
 
 # Using admin session for registration operations
 # as it typically involves creating new organizations and users.
 def get_registration_service(session=Depends(get_admin_session)):
     return RegistrationService(
         RegistrationRepository(session),
-        UserRepository(session)
+        UserRepository(session),
+        ShiftRepository(session)
     )
 
 def get_auth_service(session= Depends(get_admin_session)):

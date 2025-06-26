@@ -134,32 +134,110 @@ class UserRepositoryInterface(ABC):
 
 
 class ShiftRepositoryInterface(ABC):
+    @abstractmethod
     def get_by_id(self, shift_id: UUID) -> Optional[Shift]:
-        raise NotImplementedError
+        """
+        Retrieve a Shift entity by its ID.
+        :param shift_id: UUID of the shift to be retrieved.
+        :return: Shift entity corresponding to the provided ID, or None if not found.
+        """
+        pass
 
+    @abstractmethod
     def get_all(self) -> List[Shift]:
-        raise NotImplementedError
+        """
+        Retrieve all Shift entities from the repository.
+        This method is used to fetch all shift records.
+        """
+        pass
 
+    @abstractmethod
     def add(self, shift: Shift) -> Shift:
-        raise NotImplementedError
+        """
+        Add a new Shift entity to the repository.
+        This method is used to create a new shift record.
+        """
+        pass
 
+    @abstractmethod
     def delete(self, shift_id: UUID) -> None:
-        raise NotImplementedError
+        """
+        Delete a Shift entity by its ID.
+        :param shift_id: UUID of the shift to be deleted.
+        """
+        pass
 
+    @abstractmethod
     def get_by_date(self, date: date) -> List[Shift]:
-        raise NotImplementedError
+        """
+        Get all Shift entities for a specific date.
+        :param date: Date for which shifts are being queried.
+        :return: List of Shift entities for the specified date.
+        """
+        pass
 
+    @abstractmethod
     def get_shift_slots(self) -> List[ShiftSlot]:
-        raise NotImplementedError
+        """
+        Retrieve all ShiftSlot entities from the repository.
+        This method is used to fetch all shift slot records.
+        """
+        pass
+    
+    @abstractmethod
+    def get_shift_slots_by_organization(self, organization_id: UUID) -> List[ShiftSlot]:
+        """
+        Get all ShiftSlot entities for a specific organization.
+        :param organization_id: UUID of the organization whose shift slots are being queried.
+        :return: List of ShiftSlot entities for the specified organization.
+        """
+        pass
+    
+    @abstractmethod
+    def add_shift_slot(self, shift_slot: ShiftSlot) -> ShiftSlot:
+        """
+        Add a new ShiftSlot entity to the repository.
+        This method is used to create a new shift slot record.
+        """
+        pass
+    
+    @abstractmethod
+    def update_shift_slot(self, shift_slot_id: UUID, data: dict) -> ShiftSlot:
+        """
+        Update an existing ShiftSlot entity.
+        :param shift_slot_id: UUID of the shift slot to be updated.
+        :param data: Dictionary containing the fields to be updated.
+        :return: Updated ShiftSlot entity.
+        """
+        pass
+    
+    @abstractmethod
+    def delete_shift_slot(self, shift_slot_id: UUID) -> None:
+        """
+        Delete a ShiftSlot entity by its ID.
+        :param shift_slot_id: UUID of the shift slot to be deleted.
+        """
+        pass
+    
+    @abstractmethod
+    def get_shift_slot_by_id(self, shift_slot_id: UUID) -> Optional[ShiftSlot]:
+        """
+        Retrieve a ShiftSlot entity by its ID.
+        :param shift_slot_id: UUID of the shift slot to be retrieved.
+        :return: ShiftSlot entity corresponding to the provided ID, or None if not found.
+        """
+        pass
 
+    @abstractmethod
     def get_by_user(self, user_id: UUID) -> List[Shift]:
         """
         Get all shifts for a specific user.
         :param user_id: UUID of the user whose shifts are being queried.
         :return: List of Shift entities for the specified user.
         """
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def get_by_user_and_date(self, user_id: UUID, date: date) -> List[Shift]:
         """
         Get all shifts for a specific user on a specific date.
@@ -167,8 +245,9 @@ class ShiftRepositoryInterface(ABC):
         :param date: Date for which shifts are being queried.
         :return: List of Shift entities for the specified user and date.
         """
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def update(self, shift_id: UUID, data: dict) -> Shift:
         """
         Update an existing Shift entity.
@@ -176,4 +255,4 @@ class ShiftRepositoryInterface(ABC):
         :param data: Dictionary containing the fields to be updated.
         :return: Updated Shift entity.
         """
-        raise NotImplementedError
+        pass

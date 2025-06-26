@@ -1,5 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
+from datetime import date
 from sqlmodel import Session, select
 from shifty.domain.entities import Shift, ShiftSlot
 from shifty.domain.repositories import ShiftRepositoryInterface
@@ -53,3 +54,36 @@ class ShiftRepository(ShiftRepositoryInterface):
 
     def get_shift_slots(self) -> List[ShiftSlot]:
         return list(self.session.exec(select(ShiftSlot)).all())
+
+    def get_shift_slots_by_organization(self, organization_id: UUID) -> List[ShiftSlot]:
+        return list(self.session.exec(
+            select(ShiftSlot).where(ShiftSlot.organization_id == organization_id)
+        ).all())
+
+    def add_shift_slot(self, shift_slot: ShiftSlot) -> ShiftSlot:
+        self.session.add(shift_slot)
+        self.session.commit()
+        self.session.refresh(shift_slot)
+        return shift_slot
+
+    def update_shift_slot(self, shift_slot_id: UUID, data: dict) -> ShiftSlot:
+        shift_slot = self.session.get(ShiftSlot, shift_slot_id)
+        if not shift_slot:
+            raise ValueError("Shift slot not found")
+        for field, value in data.items():
+            setattr(shift_slot, field, value)
+        self.session.add(shift_slot)
+        self.session.commit()
+        self.session.refresh(shift_slot)
+        return shift_slot
+
+    def delete_shift_slot(self, shift_slot_id: UUID) -> None:
+        shift_slot = self.session.get(ShiftSlot, shift_slot_id)
+        if shift_slot:
+            self.session.delete(shift_slot)
+            self.session.commit()
+        else:
+            raise ValueError("Shift slot not found")
+
+    def get_shift_slot_by_id(self, shift_slot_id: UUID) -> Optional[ShiftSlot]:
+        return self.session.get(ShiftSlot, shift_slot_id)

@@ -43,3 +43,22 @@ class ShiftSlotOut(BaseModel):
 
 class ShiftBulkCreate(BaseModel):
     shifts: list[ShiftCreate]
+
+
+class ShiftSlotCreate(BaseModel):
+    organization_id: UUID
+    name: str
+    start_time: time
+    end_time: time
+    description: Optional[str] = None
+    expected_workers: int = 1
+    is_active: bool = True
+
+
+class ShiftSlotUpdate(BaseModel):
+    name: Optional[str] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    description: Optional[str] = None
+    expected_workers: Optional[int] = None
+    is_active: Optional[bool] = None

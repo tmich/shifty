@@ -1,9 +1,9 @@
 from uuid import UUID
 from datetime import datetime
 from typing import List
-from shifty.domain.entities import Shift, ShiftStatus
+from shifty.domain.entities import Shift, ShiftStatus, ShiftSlot
 from shifty.domain.exceptions import OverlappingShiftException, NotExistsException
-from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult
+from shifty.application.dto.shift_dto import ShiftCreate, ShiftCalculationRequest, ShiftCalculationResult, ShiftSlotCreate, ShiftSlotUpdate
 from shifty.domain.repositories import ShiftRepositoryInterface, AvailabilityRepositoryInterface, UserRepositoryInterface
 import random
 import copy
@@ -81,6 +81,48 @@ class ShiftService:
 
     def get_shift_slots(self):
         return self.repository.get_shift_slots()
+    
+    def get_shift_slots_by_organization(self, organization_id: UUID):
+        return self.repository.get_shift_slots_by_organization(organization_id)
+    
+    def create_shift_slot(self, data: ShiftSlotCreate) -> ShiftSlot:
+        shift_slot = ShiftSlot(
+            organization_id=data.organization_id,
+            name=data.name,
+            start_time=data.start_time,
+            end_time=data.end_time,
+            description=data.description,
+            expected_workers=data.expected_workers,
+            is_active=data.is_active,
+            created_at=datetime.now()
+        )
+        return self.repository.add_shift_slot(shift_slot)
+    
+    def update_shift_slot(self, shift_slot_id: UUID, data: ShiftSlotUpdate) -> ShiftSlot:
+        # Check if shift slot exists
+        existing_slot = self.repository.get_shift_slot_by_id(shift_slot_id)
+        if not existing_slot:
+            raise NotExistsException("Shift slot not found")
+        
+        # Prepare update data, filtering out None values
+        update_data = {k: v for k, v in data.dict().items() if v is not None}
+        if 'updated_at' not in update_data:
+            update_data['updated_at'] = datetime.now()
+        
+        return self.repository.update_shift_slot(shift_slot_id, update_data)
+    
+    def delete_shift_slot(self, shift_slot_id: UUID) -> None:
+        existing_slot = self.repository.get_shift_slot_by_id(shift_slot_id)
+        if not existing_slot:
+            raise NotExistsException("Shift slot not found")
+        
+        self.repository.delete_shift_slot(shift_slot_id)
+    
+    def get_shift_slot_by_id(self, shift_slot_id: UUID) -> ShiftSlot:
+        shift_slot = self.repository.get_shift_slot_by_id(shift_slot_id)
+        if not shift_slot:
+            raise NotExistsException("Shift slot not found")
+        return shift_slot
 
     def calculate_shifts(self, request: ShiftCalculationRequest) -> list[ShiftCalculationResult]:
         availabilities = self.availability_repository.get_by_date(request.date)
